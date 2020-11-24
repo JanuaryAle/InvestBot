@@ -80,6 +80,7 @@ bot.on('message', async ctx => {
 
 if (process.env.NODE_ENV === "production")
 {
+    console.log('prod')
     bot.telegram.setWebhook(`${URL}/bot${TOKEN}`)
 }else{
     bot.launch(5000)
