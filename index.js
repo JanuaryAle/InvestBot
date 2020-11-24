@@ -1,93 +1,37 @@
-const Telegraf = require('telegraf')
+const Koa = require('koa')
+const Router = require('koa-router')
+const bodyParser = require('koa-bodyparser')
 require('dotenv').config()
 
 
-const {
-    Markup,
-    Extra,
-    Stage,
-    session
-} = Telegraf
-
-const TelegrafI18n = require('telegraf-i18n')
-const path = require("path")
-const fileName = './data/userlist.json'
-const file = require(fileName)
-
-const start = require('./Start')
-
 const TOKEN = process.env.BOT_TOKEN
+const PORT = process.env.PORT
 const URL = process.env.URL
 
-const stage = new Stage();
+// Настройка бота
 
-const bot = new Telegraf(process.env.TOKEN)
+const bot = require('./bot')
 
-const i18n = new TelegrafI18n({
-    defaultLanguage: 'en',
-    directory: path.resolve(__dirname, 'locales'),
-    useSession: true,
-    allowMissing: false,
-    sessionName: 'session'
-});
+// Добавляем роуты
 
-bot.use(async (ctx, next) => {
-    const start = new Date()
-    await next()
-    const response_time = new Date() - start
-    console.log(`(Response Time: ${response_time})`)
-  })
+const app = new Koa()
 
-bot.use(session())
-bot.use(i18n.middleware());
-bot.use(stage.middleware())
+const router = Router()
 
-stage.register(start) 
-
-bot.command('start', async ctx => {
-    //if (!isUserInBd(ctx)){
-        ctx.scene.enter('start')
-    // }else {
-    //     ctx.reply('Вы уже приняли соглашение')
-    // }
+router.post(`/bot${TOKEN}`, async (ctx, a) => {
+    await bot.handleUpdate(ctx.request.body, ctx.response)  // Наконец-то, эта штука задана правилно и бот реагирует
+    ctx.status = 200
 })
 
-bot.hears(/🎩|👩🏻‍🔧|🛍|❓|🌎|📈/, async ctx =>
-    {
-        if (isUserInBd(ctx)){
-            const text = ctx.message.text
-            await ctx.replyWithHTML("Этот раздел пока не реализован:) /start")
-            //await ctx.scene.enter(scene)
-        }
-    }  
-);
-
-bot.on('message', async ctx => {
-    ctx.reply('Пока ничего кроме /start сделать нельзя')
-    // if (isUserInBd(ctx)){
-    //     //await ctx.scene.enter('menu')
-    // }
+router.get(`/`, ctx => {    // Все ок, сервер работает
+    ctx.status = 200
 })
 
-if (process.env.NODE_ENV === "production")
-{
-    bot.telegram.setWebhook(`${URL}/bot${TOKEN}`)
-}else{
-    bot.launch(5000)
-}
+// Ставим мидлы
 
-let flag = false
+app.use(bodyParser())
+app.use(router.routes())
 
-function isUserInBd(ctx){
-
-    if (flag) return flag
-
-    file.forEach(user => {
-        if (ctx.update.message.chat.id === user.id){
-            flag = true
-            return
-        }
-    });
-
-    return flag
-}
+app.listen(PORT, () => {
+    console.log(`Listening on ${PORT}`)
+})

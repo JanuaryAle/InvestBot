@@ -10,6 +10,10 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-router": "^10.0.0",
+    "mongoose": "^5.10.15",
     "telegraf": "^3.38.0",
     "telegraf-i18n": "^6.6.0"
   }
