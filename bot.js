@@ -62,11 +62,11 @@ bot.command('start', async ctx => {
 
 bot.hears(/🎩|👩🏻‍🔧|🛍|❓|🌎|📈/, async ctx =>
     {
-        if (isUserInBd(ctx)){
-            const text = ctx.message.text
+        // if (isUserInBd(ctx)){
+        //     const text = ctx.message.text
             await ctx.replyWithHTML("Этот раздел пока не реализован:) /start")
             //await ctx.scene.enter(scene)
-        }
+        // }
     }  
 );
 
