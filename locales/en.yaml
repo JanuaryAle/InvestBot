@@ -1,0 +1,131 @@
+selectLang: Select your language
+lang: 🇺🇸 Language
+change: Language is set successfully
+start:
+  hello: |
+    <b>Nice to meet you, <a href="tg://user?id=${userId}">${userFirstName}</a>!</b>
+   
+    I'm a virtual assistant of an investment fund ${name}. I'm at your service! 
+    I will keep you updated on the latest stock market news, accompany your investment way, and tell you about our advantages! 
+    
+    <i>Welcome 🏁</i>
+  acception: 
+    text: |
+      <b>‼️Notification‼️</b>
+
+      According to the Federal law "on the securities market" of 22.04.1996 n 39-FZ, we do not carry out brokerage activities and do not provide Forex dealing services.
+      The company only provides consulting services on financial intermediation issues.
+      All materials provided by the bot are for informational purposes only and are not instructions for action.
+      The data presented are only assumptions based on our experience.
+
+      _________
+      You are fully responsible for the trading decisions made and the results obtained in the course of work.
+    button: I accept all risks ✅
+  great:
+    text: |
+      Great!
+      Shall we begin? First of all, I suggest you learn more about our company and get to know us 🤝
+      If you already know everything and are ready to work, you can skip this step 🚀
+    buttons:
+      ready: I'm ready to inveterate! 👑
+      know: Learn more about us 🎩
+      continue: Show me your services 👑
+help: |
+  <b>It's pretty easy to communicate with me:</b>
+
+  ✔️ Using commands and buttons you will always find the desired section
+  ✔️ To see this instruction again, write /help
+  ✔️ To continue working with me, just call me!😁 /bot
+
+  <b>See what I can do 😎... </b>
+
+  📈 Discover the dynamic life of the stock market with our "News feed"
+  👩🏻‍🎓 In our "Training section" you can find useful articles on promotions, and try to examine yourself.
+  🏢 Would you like to know more about us? Information about the Fund can be found in the section "Fund"
+  🧞 We advise you to familiarize yourself with our services in the section "Services"
+retry: 🔙 Back
+admin: You don't have access to this mode
+scenes:  
+  menu: 
+    text: |
+      <b>What can I do for you?</b>
+
+      Please use the keyboard at the bottom to go to the desired section.
+    buttons:
+      about_us: 🎩 About us
+      ser: 👩🏻‍🔧 Services
+      prod: 🛍 Goods
+      qust: ❓ FAQ
+      news: 🌎 News
+      res: 📈 Reports
+  fond:
+    about_us: |
+      HOM is an investment company. Our employees analyze the stock, currency and cryptocurrency markets, develop algorithms for trading advisors, and advise clients in the field of investment.
+
+      <b>What we offer: </b>
+      🦉 Trading advisors (robots). Our robots work with stocks, currencies, options, and futures.
+      💰 IHOM Foundation.
+      🔑 Access to a private channel.
+
+      Each instrument is verified by our investors. To learn more about each item, go to the "Services" section.
+    text: |
+      <b>Welcome to the section of our Fund, ${name}</b>!
+
+      Here we will tell you about ourselves and look forward to receive your questions.
+      Would you like to get a prompt response?
+      🚀 It's possible, we have already prepared it in the list of frequently asked questions😄
+    buttons:
+      more: 🙋‍♀️ Fund info
+      ques: 🗄 Frequently asked questions
+      ask: 📝 Ask us
+    ques: |
+      <b>Question:</b>
+      ${question}
+      
+      <b>Answer:</b>
+      ${answer}
+    list: |
+      <b>Below is a list of FAQ's</b>
+      Click on the question to see answer:
+    ask:
+      text: |
+        <b>What would you like to know?🙂</b>   
+        Write the text of your question in one message and our experts will answer you as soon as possible.
+      ok: Your request was successfully sent!
+      err: Please send us a text message and we will contact you to talk in detail.
+      end: The question timeout has expired, if you still want to ask a question, click again on "Ask us".
+  news:
+    text: |
+      <b>You have entered the News feed section</b>
+
+      Here we will provide you with the latest news on stocks and companies📉
+    leave: You have left the news section...
+    source: <a href="${href}">See this article in the source</a>
+    buttons:
+      more: 🔎 Show more
+  prod:
+    text: |
+      <b>You are now in the services section</b>
+
+      We love our work and put our heart and soul into developing the products presented below. 
+      We use each of them for ourselves, so we guarantee a high level of reliability!
+
+      Find out more about the concrete service by clicking on it, and if you want, write us your impressions or place an order.
+      We will provide you with contacts✨
+    caption: |
+      <b>${name}</b>
+      
+      Unit cost: ${price}
+
+      ${description}
+      
+      <b>${contact}</b>
+  vic:
+    text: |
+      <b>You have selected the training section</b>
+      
+      🎲A list of articles is printed below
+      ❓ At the end of each one you can test your knowledge
+      ❓ Click on the title to start reading it
+    ok: Finish
+    start: ✏️Start test
