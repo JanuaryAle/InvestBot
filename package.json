@@ -9,11 +9,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.0.0",
+    "bcryptjs": "^2.4.3",
+    "cheerio": "^1.0.0-rc.3",
     "dotenv": "^8.2.0",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^10.0.0",
     "mongoose": "^5.10.15",
+    "needle": "^2.5.2",
+    "querystring": "^0.2.0",
     "telegraf": "^3.38.0",
     "telegraf-i18n": "^6.6.0"
   }

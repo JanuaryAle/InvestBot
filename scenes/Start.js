@@ -1,10 +1,10 @@
 const Markup = require('telegraf/markup')
 const Extra = require('telegraf/extra')
 const WizardScene = require('telegraf/scenes/wizard')
-const file = require('./data/info.json')
+const file = require('../data/info.json')
 
 const fs = require('fs')
-const usersFileName = './data/userlist.json'
+const usersFileName = '../data/userlist.json'
 const users = require(usersFileName)
 
 class SceneGenerator{
@@ -78,18 +78,7 @@ class SceneGenerator{
             // }
             // users.push(user)
             // await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);
-            await ctx.replyWithHTML(`${ctx.i18n.t('scenes.menu.text')}`,
-            Extra.HTML()
-            .markup(Markup.keyboard(
-                [
-                    [`${ctx.i18n.t('scenes.menu.buttons.ser')}`,
-                    `${ctx.i18n.t('scenes.menu.buttons.prod')}`],
-                    [`${ctx.i18n.t('scenes.menu.buttons.res')}`,
-                    `${ctx.i18n.t('scenes.menu.buttons.news')}`],
-                    [`${ctx.i18n.t('scenes.menu.buttons.qust')}`,
-                    `${ctx.i18n.t('scenes.menu.buttons.about_us')}`],
-                    [`${ctx.i18n.t('lang')}`]
-                ]).resize()))
+            require("./helper").menuMessage(ctx)
         })
         return item
     }
