@@ -52,7 +52,7 @@ class SceneGenerator{
             try{
                 if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.ready')}`){ 
                     ctx.reply('Чуть позже определимся, что делать дальше, пока выходим из всех сцен, можете прогнать старт снова /start')         
-                    return ctx.scene.leave()
+                    require("./helper").menuMessage(ctx)
                 }else if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.know')}`){
                     ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.about_us')}`,
                         Extra.HTML()
@@ -67,18 +67,9 @@ class SceneGenerator{
             try{ 
                 if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.continue')}`){ 
                     ctx.reply('И тут вы переходите в услуги, но раздел пока не реализован, поэтому пока выходим из всех сцен, можете снова прогнать старт /start')  
-                    return ctx.scene.leave()                 
+                    require("./helper").menuMessage(ctx)                
                 }
             }catch(e){console.log(e)}
-        })
-
-        item.leave(async ctx => {
-            // const user = {
-            //     id: ctx.update.message.chat.id
-            // }
-            // users.push(user)
-            // await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);
-            require("./helper").menuMessage(ctx)
         })
         return item
     }
