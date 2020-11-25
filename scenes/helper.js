@@ -27,6 +27,7 @@ module.exports.setCommands = (bot, registred) => {
             ctx.i18n.locale(callbackQuery)
             const message = ctx.i18n.t('change')
             await ctx.replyWithHTML(message)
+            this.menuMessage(ctx)
         }
     })
 
@@ -58,6 +59,8 @@ async function langChange(ctx){
 }
 
 module.exports.menuMessage = async (ctx) =>
+{
+    ctx.scene.leave()
     await ctx.replyWithHTML(`${ctx.i18n.t('scenes.menu.text')}`, Extra.HTML()
     .markup(Markup.keyboard(
         [
@@ -70,3 +73,4 @@ module.exports.menuMessage = async (ctx) =>
             [`${ctx.i18n.t('lang')}`]
         ]).resize()))
 
+    }
