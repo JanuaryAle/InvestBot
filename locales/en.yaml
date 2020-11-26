@@ -121,6 +121,14 @@ scenes:
       Unit cost: ${price}
 
       ${description}
+    buttons:
+      ser:
+        left: Предыдущая услуга
+        right: Следующая услуга
+      order: Заказать
+      prod:
+        left: Предыдущий товар
+        right: Следующий товар
   vic:
     text: |
       <b>You have selected the training section</b>

@@ -120,6 +120,14 @@ scenes:
       Стоимость услуги: ${price}
 
       ${description}
+    buttons:
+    ser:
+      left: Previous service
+      right: Next service
+    order: Order
+    prod:
+      left: Предыдущий товар
+      right: Следующий товар
   vic:
     text: |
       <b>Вот вы и в разделе обучения!</b>

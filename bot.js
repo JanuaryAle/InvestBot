@@ -41,6 +41,7 @@ const i18n = new TelegrafI18n({
 
 bot.use(async (ctx, next) => {
     const start = new Date()
+    console.log(ctx)
     await next()
     const response_time = new Date() - start
     console.log(`(Response Time: ${response_time})`)
@@ -51,14 +52,6 @@ bot.use(i18n.middleware());
 bot.use(stage.middleware())
 
 stage.register(start, news, fond) 
-
-bot.command('start', async ctx => {
-    //if (!isUserInBd(ctx)){
-        await ctx.scene.enter('start')
-    // }else {
-    //     await ctx.scene.enter('menu')
-    // }
-})
 
 require('./scenes/helper').setCommands(bot)
 

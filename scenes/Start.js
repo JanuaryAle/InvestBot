@@ -4,6 +4,7 @@ const WizardScene = require('telegraf/scenes/wizard')
 const file = require('../data/info.json')
 
 const fs = require('fs')
+
 const usersFileName = '../data/userlist.json'
 const users = require(usersFileName)
 
@@ -23,6 +24,12 @@ class SceneGenerator{
             return ctx.wizard.next()
         }, async ctx => {
             try{
+                if (typeof ctx.message !== "undefined" && typeof ctx.message.text !== "undefined"){
+                    if (ctx.message.text === "/start"){
+                        await ctx.scene.enter('start')
+                    }
+                }}catch(e){}
+            try{
                 const callbackQuery = ctx.callbackQuery.data
                 ctx.i18n.locale(callbackQuery);
                 await ctx.replyWithHTML(ctx.i18n.t('change'))
@@ -36,6 +43,12 @@ class SceneGenerator{
                 return ctx.wizard.next()
             }catch(e){}
         }, async ctx => {
+            try{
+                if (typeof ctx.message !== "undefined" && typeof ctx.message.text !== "undefined"){
+                    if (ctx.message.text === "/start"){
+                        await ctx.scene.enter('start')
+                    }
+                }}catch(e){}
             try{
                 if (ctx.message.text == `${ctx.i18n.t('start.acception.button')}`){
                     addInBase(ctx)
@@ -51,6 +64,12 @@ class SceneGenerator{
             }catch(e){}
         }, async ctx => {
             try{
+                if (typeof ctx.message !== "undefined" && typeof ctx.message.text !== "undefined"){
+                    if (ctx.message.text === "/start"){
+                        await ctx.scene.enter('start')
+                    }
+                }}catch(e){}
+            try{
                 if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.ready')}`){ 
                     ctx.reply('Чуть позже определимся, что делать дальше, пока выходим из всех сцен, можете прогнать старт снова /start')         
                     require("./helper").menuMessage(ctx)
@@ -63,15 +82,22 @@ class SceneGenerator{
                         ]).resize()))    
                     return ctx.wizard.next()                 
                 }
-            }catch(e){console.log(e)}
+            }catch(e){}
         }, async ctx => {
             try{ 
+                try{
+                    if (typeof ctx.message !== "undefined" && typeof ctx.message.text !== "undefined"){
+                        if (ctx.message.text === "/start"){
+                            await ctx.scene.enter('start')
+                        }
+                    }}catch(e){}
                 if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.continue')}`){ 
                     ctx.reply('И тут вы переходите в услуги, но раздел пока не реализован, поэтому пока выходим из всех сцен, можете снова прогнать старт /start')  
                     require("./helper").menuMessage(ctx)                
                 }
-            }catch(e){console.log(e)}
+            }catch(e){}
         })
+
         return item
     }
 }

@@ -21,6 +21,14 @@ let flag
 
 module.exports.setCommands = (bot) => {
 
+    bot.start( async ctx => {
+        //if (!isUserInBd(ctx)){
+            await ctx.scene.enter('start')
+        // }else {
+        //     await ctx.scene.enter('menu')
+        // }
+    })
+
     bot.hears(/🌎|🎩/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         {
             if (isUserInBd(ctx)){
