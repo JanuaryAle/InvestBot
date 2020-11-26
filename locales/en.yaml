@@ -46,8 +46,8 @@ help: |
 retry: 🔙 Back
 admin: You don't have access to this mode
 abort:
-  text: Операция была отменена
-  button: ✖️ Отмена
+  text: The operation was canceled
+  button: ✖️ Cancel
 scenes:  
   menu: 
     text: |
@@ -80,7 +80,7 @@ scenes:
     buttons:
       more: 🙋‍♀️ Fund info
       ques: 🗄 Frequently asked questions
-      ask: 📝 Ask us
+      ask: 🙋 Support
     ques: |
       <b>Question:</b>
       ${question}

@@ -9,6 +9,7 @@ let asking = false
 let askMessage
 let timeout
 let startMessage
+let restart = false
 
 const CHAT_ID = process.env.CALLBACK_CHAT
 
@@ -18,28 +19,12 @@ class FondSceneGenerator{
         const item = new Scene('🎩')
 
         item.enter(async ctx => {
-            startPoint(ctx)
+            if (!restart)
+                startPoint(ctx)
         })
        
         item.hears(match('scenes.fond.buttons.ask'), async ctx =>{
-            try{
-                asking = true
-                ctx.webhookReply = false
-                askMessage = await ctx.reply(`${ctx.i18n.t('scenes.fond.ask.text')}`,  Extra.HTML({parse_mode: 'HTML'}).markup(Markup.keyboard(
-                    [[`${ctx.i18n.t('abort.button')}`], 
-                    [`${ctx.i18n.t('retry')}`]]).resize()))
-                ctx.webhookReply = true
-            
-                timeout = setTimeout(async () => {      
-                    await ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id)               
-                    await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ask.end')}`, 
-                    Extra.HTML({parse_mode: 'HTML'})
-                    .markup(Markup.keyboard(
-                        [[`${ctx.i18n.t('scenes.fond.buttons.ask')}`], 
-                        [`${ctx.i18n.t('retry')}`]]).resize())) 
-                    asking = false
-                }, 120000)
-            }catch(e){}
+            askFunction(ctx)
         })
 
         item.hears(match('retry'), async ctx => {
@@ -80,7 +65,7 @@ class FondSceneGenerator{
                             [`${ctx.i18n.t('retry')}`]]).resize()))
                     asking = false
                     clearTimeout(timeout)
-            }catch(e){}
+                }catch(e){}
             }
         })
         
@@ -90,6 +75,7 @@ class FondSceneGenerator{
             }catch(e){}
             clearTimeout(timeout)
             asking = false
+            restart = false
         })
 
         return item
@@ -107,3 +93,27 @@ async function startPoint(ctx){
                 [`${ctx.i18n.t('retry')}`]]).resize()))  
     ctx.webhookReply = true    
 }
+
+async function askFunction(ctx){
+    try{
+        if (!startMessage) restart = true
+        asking = true
+        ctx.webhookReply = false
+        askMessage = await ctx.reply(`${ctx.i18n.t('scenes.fond.ask.text')}`,  Extra.HTML({parse_mode: 'HTML'}).markup(Markup.keyboard(
+            [[`${ctx.i18n.t('abort.button')}`], 
+            [`${ctx.i18n.t('retry')}`]]).resize()))
+        ctx.webhookReply = true
+    
+        timeout = setTimeout(async () => {      
+            await ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id)               
+            await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ask.end')}`, 
+            Extra.HTML({parse_mode: 'HTML'})
+            .markup(Markup.keyboard(
+                [[`${ctx.i18n.t('scenes.fond.buttons.ask')}`], 
+                [`${ctx.i18n.t('retry')}`]]).resize())) 
+            asking = false
+        }, 120000)
+    }catch(e){console.log(e)}
+}
+
+module.exports.askFunction = askFunction

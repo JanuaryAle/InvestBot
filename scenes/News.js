@@ -18,14 +18,14 @@ class SceneGenerator{
         index = 0 
         list = []
         flag = true
-        this.printPortion(3, ctx)
+        printPortion(3, ctx)
         await ctx.reply(`${ctx.i18n.t('scenes.news.text')}`, Extra.HTML({parse_mode: 'HTML'})
         .markup(Markup.keyboard(
             [[`${ctx.i18n.t('scenes.news.buttons.more')}`], [`${ctx.i18n.t('retry')}`]]).resize()))
         }) 
         
         item.hears(match('scenes.news.buttons.more'), async ctx => {           
-            this.show(ctx)
+            show(ctx)
         }) 
 
         item.hears(match('retry'), async ctx => {  
@@ -34,7 +34,7 @@ class SceneGenerator{
 
         item.action('show', async ctx => 
         {
-            this.printPortion(3, ctx)
+            printPortion(3, ctx)
         })
         
         item.leave(async ctx => {
@@ -44,32 +44,30 @@ class SceneGenerator{
         require('./helper').setCommands(item)
         return item
     }
-
-    async show(ctx){  
-        this.printPortion(2, ctx)  
-    }
-
-    async printPortion(k, ctx){
-        while (k > 0 && index < list.length && flag) 
-        {
-            const element = list[index]
-            const readMore = `${ctx.i18n.t('scenes.news.source', {href: element.href})}`
-            await ctx.replyWithHTML(readMore)
-            k--
-            index += 1
-        }
-        if (index >= list.length - 2){
-            const promise = GetNewsList(page++)
-            promise.then((data) => {
-                if (flag){
-                    list = list.concat(data);
-                    if (k > 0) this.printPortion(k, ctx)
-                }
-            })
-        }
-    } 
 }
 
 module.exports = new SceneGenerator().GetNewsScene()
 
+module.exports.show = async function show(ctx){  
+    printPortion(2, ctx)  
+}
 
+async function printPortion(k, ctx){
+    while (k > 0 && index < list.length && flag) 
+    {
+        const element = list[index]
+        const readMore = `${ctx.i18n.t('scenes.news.source', {href: element.href})}`
+        await ctx.replyWithHTML(readMore)
+        k--
+        index += 1
+    }
+    if (index >= list.length - 2){
+        const promise = GetNewsList(page++)
+        promise.then((data) => {
+            if (flag){
+                list = list.concat(data);
+                if (k > 0) printPortion(k, ctx)
+            }
+        })
+    }
+} 

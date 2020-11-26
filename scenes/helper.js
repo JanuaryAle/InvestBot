@@ -217,8 +217,17 @@ module.exports.setCommands = (bot) => {
             langChange(ctx)
     })
 
-    bot.hears(match('scenes.news.buttons.more'), async ctx => {           
-        if (isUserInBd(ctx)) await ctx.scene.enter('🌎')
+    bot.hears(/🙋/, async ctx =>{
+        if (isUserInBd(ctx)){                
+            require('./Fond').askFunction(ctx)
+            await ctx.scene.enter('🎩')
+        }
+    })
+
+    bot.hears(/🔎/, async ctx => {           
+        if (isUserInBd(ctx)){
+            await ctx.scene.enter('🌎')
+        }
     }) 
 
     bot.hears(/🔙/, async ctx => {  
