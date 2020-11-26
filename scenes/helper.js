@@ -190,6 +190,7 @@ module.exports.setCommands = (bot) => {
     bot.hears(/❓/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         {
             if (isUserInBd(ctx)){
+                console.log(ctx.from.id)
                 await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.list')}`, Extra.HTML().markup(Markup.inlineKeyboard(convertKeyboard(answers.values, ctx)))) 
             }
         }  
