@@ -41,7 +41,6 @@ const i18n = new TelegrafI18n({
 
 bot.use(async (ctx, next) => {
     const start = new Date()
-    console.log(ctx)
     await next()
     const response_time = new Date() - start
     console.log(`(Response Time: ${response_time})`)
