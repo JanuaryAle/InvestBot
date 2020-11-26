@@ -51,7 +51,7 @@ abort:
 scenes:  
   menu: 
     text: |
-      <b>What can I do for you?</b>
+      <b>What can I do for you?</b>👨🏼‍💻
 
       Please use the keyboard at the bottom to go to the desired section.
     buttons:

@@ -5,9 +5,12 @@ const { match } = require('telegraf-i18n')
 const queryProduct = require('../util/queryProduct');
 const queryService = require('../util/queryService');
 
-const fs = require('fs')
+const fs = require('fs');
+
 const usersFileName = '../data/userlist.json'
 const users = require(usersFileName)
+const fileNameAnswers = '../data/answers.json'
+const answers =  require(fileNameAnswers)
 
 let messageP
 let listP
@@ -29,13 +32,14 @@ module.exports.setCommands = (bot) => {
         // }
     })
 
-    bot.hears(/🌎|🎩/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
+    bot.hears(/^[🌎🎩]/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         {
+            try{
             if (isUserInBd(ctx)){
                 const text = ctx.message.text
                 const scene = text.charAt(0)+text.charAt(1)
                 await ctx.scene.enter(scene)
-            }
+            }}catch(e){}
         }  
     );
 
@@ -181,6 +185,40 @@ module.exports.setCommands = (bot) => {
             }
         }catch(e){}})
 
+    // Вопросы
+    
+    bot.hears(/❓/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
+        {
+            if (isUserInBd(ctx)){
+                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.list')}`, Extra.HTML().markup(Markup.inlineKeyboard(convertKeyboard(answers.values, ctx)))) 
+            }
+        }  
+    );
+
+    bot.action(/ques#/, async ctx => {
+
+        try{
+            var id = ctx.callbackQuery.data.split("#")[1]
+            let element
+            answers.values.forEach(item => {
+                if (item.id == id){
+                    element = item
+                    return
+                }
+            })
+            if (element){
+                ctx.webhookReply = false
+                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ques', {
+                    question: element.question,
+                    answer: element.answer
+                })}`)
+                ctx.webhookReply = true
+            }
+        }catch(e){}
+    })
+
+    ///////////////////////////////////////////////////////////////
+
     bot.help( async ctx => {
         if (isUserInBd(ctx))
             await ctx.replyWithHTML(`${ctx.i18n.t('help')}`)
@@ -324,4 +362,12 @@ async function serMessage(ctx){
         ctx.webhookReply = true
         return false       
     }
+}
+
+function convertKeyboard(element, ctx){
+    var keyboard = []
+    element.forEach((item, i) => {
+        keyboard.push([Markup.callbackButton(item.question, `ques#${item.id}`)])
+    })
+    return keyboard
 }
