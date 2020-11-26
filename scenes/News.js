@@ -14,8 +14,6 @@ class SceneGenerator{
     GetNewsScene() {
         const item = new Scene('🌎')
 
-        require('./helper').setCommands(item)
-
         item.enter(async ctx => {
         index = 0 
         list = []
@@ -30,6 +28,10 @@ class SceneGenerator{
             this.show(ctx)
         }) 
 
+        item.hears(match('retry'), async ctx => {  
+            require("./helper").menuMessage(ctx)         
+        }) 
+
         item.action('show', async ctx => 
         {
             this.printPortion(3, ctx)
@@ -39,6 +41,7 @@ class SceneGenerator{
             flag = false
         })
 
+        require('./helper').setCommands(item)
         return item
     }
 

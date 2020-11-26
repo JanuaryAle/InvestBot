@@ -45,6 +45,9 @@ help: |
   🧞 We advise you to familiarize yourself with our services in the section "Services"
 retry: 🔙 Back
 admin: You don't have access to this mode
+abort:
+  text: Операция была отменена
+  button: ✖️ Отмена
 scenes:  
   menu: 
     text: |
@@ -103,7 +106,7 @@ scenes:
     source: <a href="${href}">See this article in the source</a>
     buttons:
       more: 🔎 Show more
-  prod:
+  ser:
     text: |
       <b>You are now in the services section</b>
 
@@ -118,8 +121,6 @@ scenes:
       Unit cost: ${price}
 
       ${description}
-      
-      <b>${contact}</b>
   vic:
     text: |
       <b>You have selected the training section</b>

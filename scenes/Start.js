@@ -38,6 +38,7 @@ class SceneGenerator{
         }, async ctx => {
             try{
                 if (ctx.message.text == `${ctx.i18n.t('start.acception.button')}`){
+                    addInBase(ctx)
                     ctx.replyWithHTML(`${ctx.i18n.t('start.great.text')}`,
                         Extra.HTML()
                         .markup(Markup.keyboard(
@@ -76,3 +77,19 @@ class SceneGenerator{
 }
 
 module.exports = new SceneGenerator().getStartScene()
+
+async function addInBase(ctx){
+    try{
+        let isfind = false
+        users.forEach(user => {
+            if (ctx.chat.id === user.id){
+                isfind = true
+                return
+            }
+        });
+        if (isfind) return
+        const element = {id: ctx.chat.id, lang: ctx.i18n.locale()}
+        users.push(element) 
+        await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);
+    }catch(e){}
+}

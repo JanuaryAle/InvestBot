@@ -9,17 +9,13 @@ const {
 } = Telegraf
 
 const TelegrafI18n = require('telegraf-i18n')
-const GetNewsList = require('./util/parser')
-const { match } = require('telegraf-i18n')
 const path = require("path")
-const fileName = './data/userlist.json'
-const file = require(fileName)
 
 const start = require('./scenes/Start')
 const news = require('./scenes/News')
+const fond = require('./scenes/Fond')
 
 const mongoose = require('mongoose')
-const { menuMessage } = require('./scenes/helper')
 
 mongoose.connect(process.env.MONGO_DB_PASS
     ,{
@@ -54,46 +50,23 @@ bot.use(session())
 bot.use(i18n.middleware());
 bot.use(stage.middleware())
 
-stage.register(start, news) 
+stage.register(start, news, fond) 
 
 bot.command('start', async ctx => {
     //if (!isUserInBd(ctx)){
-        ctx.scene.enter('start')
+        await ctx.scene.enter('start')
     // }else {
     //     await ctx.scene.enter('menu')
     // }
 })
 
-require('./scenes/helper').setCommands(bot, isUserInBd)
-
-bot.on('message', async ctx =>
-{
-    if (isUserInBd(ctx))
-        menuMessage(ctx)
-});
+require('./scenes/helper').setCommands(bot)
 
 if (process.env.NODE_ENV === "production")
 {
-    console.log('prod')
     bot.telegram.setWebhook(`${URL}/bot${TOKEN}`)
 }else{
     bot.launch(5000)
 }
 
 module.exports = bot
-
-let flag = false
-
-function isUserInBd(ctx){
-
-    if (flag) return flag
-
-    file.forEach(user => {
-        if (ctx.update.message.chat.id === user.id){
-            flag = true
-            return
-        }
-    });
-
-    return flag
-}
