@@ -6,6 +6,9 @@ let pollMessage
 const usersFileName = './data/userlist.json'
 const users = require(usersFileName)
 
+const docsFileName = './data/documents.json'
+const docs = require(docsFileName)
+
 const {
     Markup,
     Extra,
@@ -46,7 +49,6 @@ const i18n = new TelegrafI18n({
     sessionName: 'session'
 });
 
-
 let isTesting = false
 
 bot.use(async (ctx, next) => {
@@ -54,7 +56,6 @@ bot.use(async (ctx, next) => {
     try{
         if (isTesting && ctx.update.message && ctx.update.message.text && !ctx.update.message.text.startsWith('📝')) isTesting = false
         if (ctx.update.poll){
-            console.log(ctx.update)
             if (isTesting && ctx.update.poll.id === pollMessage.poll.id) acceptAnswer(ctx)
     }}catch(e){}
     await next()
@@ -69,6 +70,30 @@ bot.use(stage.middleware())
 stage.register(start, news, fond) 
 
 require('./scenes/helper').setCommands(bot)
+
+// bot.hears('а', async ctx => {
+//     docs.forEach(element => {
+//         ctx.telegram.sendDocument(ctx.chat.id, element.file_id)
+//     });
+
+//     if (docs.length === 0){
+//         ctx.reply("Файлов пока нет")
+//     }  
+// })
+
+// bot.on('message', async ctx => {
+//     try{
+//         if (ctx.update.message.document){
+//         const tmp = {
+//             file_name : ctx.update.message.document.file_name,
+//             file_id : ctx.update.message.document.file_id
+//         }
+//         docs.push(tmp)
+//         await fs.writeFileSync("data/documents.json", `${JSON.stringify(docs)}`);
+//         await ctx.reply(`Файл ${tmp.file_name} получен`)
+//     }
+//     }catch(e){}
+// })
 
 if (process.env.NODE_ENV === "production")
 {

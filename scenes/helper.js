@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs')
 const { match } = require('telegraf-i18n')
 const queryProduct = require('../util/queryProduct');
 const queryService = require('../util/queryService');
+const docsFileName = '../data/documents.json'
+const docs = require(docsFileName)
 
 const fs = require('fs');
 
@@ -43,9 +45,38 @@ module.exports.setCommands = (bot) => {
 
     bot.hears(/🇺🇸|🇷🇺/, async ctx => {
         if (agreed(ctx)>=3){
-            console.log("lang")
             langChange(ctx)
         }
+    })
+
+    // Отчеты
+
+    bot.action(/Акции|IPO|Советники/, async ctx => {
+        try{
+            availibleDates(ctx)
+        }catch(e){console.log(e)}
+    })
+
+     bot.action(/data:/, async ctx => {
+        try{
+            let flag = false
+            docs.forEach(async item => {   
+                console.log(item.file_name.split('-')[1].substr(3,7)) 
+                if( item.file_name.startsWith(ctx.update.callback_query.message.text) && item.file_name.split('-')[1].substr(3,7) === ctx.callbackQuery.data.substr(5)){
+                    flag = true
+                    await ctx.telegram.sendDocument(ctx.chat.id, item.file_id)                   
+                }
+            })
+            if (!flag) await ctx.reply("Записей не найдено") 
+        }catch(e){console.log(e)}      
+     })
+
+    bot.hears(/📈/, async ctx => {
+        await ctx.replyWithHTML(`${ctx.i18n.t('scenes.reports.text')}`, Extra.HTML().markup(Markup.inlineKeyboard([
+            [Markup.callbackButton(`${ctx.i18n.t('scenes.reports.buttons.shares')}`, 'Акции')],
+            [Markup.callbackButton(`IPO`, 'IPO')],
+            [Markup.callbackButton(`${ctx.i18n.t('scenes.reports.buttons.adv')}`, "Советники")],
+        ]))) 
     })
 
     // Товары
@@ -68,7 +99,7 @@ module.exports.setCommands = (bot) => {
                         ctx.reply("Извините, пока нет ни одного товара")
                     }                            
                 }).catch( err => console.log(err))               
-            }catch(e){console.log(e)}
+            }catch(e){}
         }}
     );
 
@@ -281,7 +312,6 @@ module.exports.setCommands = (bot) => {
             await ctx.scene.enter('start') 
         }
     })
-
 }
 
 async function langChange(ctx){
@@ -393,6 +423,40 @@ async function loadSer(ctx){
             }                           
         }).catch( err => console.log(err))               
     }catch(e){console.log(e)}
+}
+async function availibleDates(ctx){
+    let set = new Set()
+    docs.forEach(async item => {
+        if( item.file_name.startsWith(ctx.callbackQuery.data)){
+            set.add(item.file_name.split('-')[1].substr(3,7))
+        }
+    })
+
+    let array = []
+    set.forEach(item=> {
+        array.push(item)
+    })
+
+    let keyboard = []
+
+    for (let i = 0; i < array.length; i+=3){
+        let mini = []
+        let j = i + 1
+        mini.push(Markup.callbackButton(`${array[i]}`, `data:${array[i]}`))
+        while (j < array.length && j < i + 3){
+            mini.push(Markup.callbackButton(`${array[j]}`, `data:${array[j]}`))
+            j++
+        } 
+        keyboard[keyboard.length] = mini
+    }
+
+    console.log(keyboard)
+    if (set.size === 0)
+    {
+        await ctx.replyWithHTML('Пока записей нет')
+    }else{
+        await ctx.reply(`${ctx.callbackQuery.data}`, Extra.HTML().markup(Markup.inlineKeyboard(keyboard)))
+    }
 }
 
 module.exports.loadSer = loadSer
