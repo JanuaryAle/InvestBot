@@ -36,7 +36,8 @@ class FondSceneGenerator{
                 await ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id)
                 await ctx.replyWithHTML(`${ctx.i18n.t('abort.text')}`,
                      Extra.HTML().markup(Markup.keyboard(
-                        [[`${ctx.i18n.t('scenes.fond.buttons.ask')}`], 
+                        [[`${ctx.i18n.t('scenes.fond.buttons.ask')}`],
+                        [`${ctx.i18n.t('scenes.menu.buttons.ser')}`], 
                         [`${ctx.i18n.t('retry')}`]]).resize()))
             }catch(e){}
             clearTimeout(timeout)
@@ -62,6 +63,7 @@ class FondSceneGenerator{
                     await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ask.ok')}`, 
                         Extra.HTML().markup(Markup.keyboard(
                             [[`${ctx.i18n.t('scenes.fond.buttons.ask')}`], 
+                            [`${ctx.i18n.t('scenes.menu.buttons.ser')}`], 
                             [`${ctx.i18n.t('retry')}`]]).resize()))
                     asking = false
                     clearTimeout(timeout)
@@ -85,14 +87,16 @@ class FondSceneGenerator{
 module.exports = new FondSceneGenerator().GetFondStage()
 
 async function startPoint(ctx){
+    try{
     ctx.webhookReply = false
         startMessage = await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.about_us')}`,
         Extra.HTML({parse_mode: 'HTML'})
             .markup(Markup.keyboard(
                 [[`${ctx.i18n.t('scenes.fond.buttons.ask')}`], 
+                [`${ctx.i18n.t('scenes.menu.buttons.ser')}`], 
                 [`${ctx.i18n.t('retry')}`]]).resize()))  
     ctx.webhookReply = true    
-}
+    }catch(e){}}
 
 async function askFunction(ctx){
     try{

@@ -1,6 +1,8 @@
 selectLang: Select your language
 lang: 🇺🇸 Language
 change: Language is set successfully
+menu: 📚 Menu
+over: 📝 Start over
 start:
   hello: |
     <b>Nice to meet you, <a href="tg://user?id=${userId}">${userFirstName}</a>!</b>
@@ -27,9 +29,9 @@ start:
       Shall we begin? First of all, I suggest you learn more about our company and get to know us 🤝
       If you already know everything and are ready to work, you can skip this step 🚀
     buttons:
-      ready: I'm ready to inveterate! 👑
-      know: Learn more about us 🎩
-      continue: Show me your services 👑
+      ready: 📝 Fill out the form
+      know: 🎩 Acquaint
+      continue: 👩🏻‍🔧 List of services 
 help: |
   <b>It's pretty easy to communicate with me:</b>
 
@@ -57,7 +59,7 @@ scenes:
     buttons:
       about_us: 🎩 About us
       ser: 👩🏻‍🔧 Services
-      prod: 🛍 Goods
+      prod: 👨🏻‍💻 Goods
       qust: ❓ FAQ
       news: 🌎 News
       res: 📈 Reports

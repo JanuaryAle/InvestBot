@@ -20,22 +20,20 @@ let messageS
 let listS
 let indexS
 
-let flag
-
 module.exports.setCommands = (bot) => {
 
     bot.start( async ctx => {
-        //if (!isUserInBd(ctx)){
+        //if (!agreed(ctx)){
             await ctx.scene.enter('start')
         // }else {
         //     await ctx.scene.enter('menu')
         // }
     })
 
-    bot.hears(/^[🌎🎩]/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
+    bot.hears(/🌎|🎩/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         {
             try{
-            if (isUserInBd(ctx)){
+            if (agreed(ctx)>=3){
                 const text = ctx.message.text
                 const scene = text.charAt(0)+text.charAt(1)
                 await ctx.scene.enter(scene)
@@ -43,10 +41,17 @@ module.exports.setCommands = (bot) => {
         }  
     );
 
+    bot.hears(/🇺🇸|🇷🇺/, async ctx => {
+        if (agreed(ctx)>=3){
+            console.log("lang")
+            langChange(ctx)
+        }
+    })
+
     // Товары
     
     bot.hears(/🛍/, async ctx =>  {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
-        if (isUserInBd(ctx)){
+        if (agreed(ctx)>=3){
             try{
                 if (messageP){
                     ctx.telegram.deleteMessage(messageP.chat.id, messageP.message_id)
@@ -117,24 +122,8 @@ module.exports.setCommands = (bot) => {
     // Услуги
 
     bot.hears(/👩🏻‍🔧/, async ctx =>  {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
-        if (isUserInBd(ctx)){
-            try{
-                if (messageS){
-                    ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
-                }
-                
-                const promise = queryService.getAll()
-
-                promise.then(async (data) =>{
-                    listS = data
-                    if (listS.length !== 0){
-                        indexS = parseInt((listS.length / 2), 10)
-                        serMessage(ctx)
-                    }else {
-                        ctx.reply("Извините, пока нет ни одной услуги")
-                    }                           
-                }).catch( err => console.log(err))               
-            }catch(e){console.log(e)}
+        if (agreed(ctx)>=3){
+           loadSer(ctx)
         }}
     );
 
@@ -189,7 +178,7 @@ module.exports.setCommands = (bot) => {
     
     bot.hears(/❓/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         {
-            if (isUserInBd(ctx)){
+            if (agreed(ctx)>=3){
                 console.log(ctx.from.id)
                 await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.list')}`, Extra.HTML().markup(Markup.inlineKeyboard(convertKeyboard(answers.values, ctx)))) 
             }
@@ -221,13 +210,17 @@ module.exports.setCommands = (bot) => {
     ///////////////////////////////////////////////////////////////
 
     bot.help( async ctx => {
-        if (isUserInBd(ctx))
+        if (agreed(ctx)>=3)
             await ctx.replyWithHTML(`${ctx.i18n.t('help')}`)
     })
 
-    bot.action(/^(?:(ru|en))$/, async ctx => {
+    bot.action(/ru|en/, async ctx => {
         try{
-            if (isUserInBd(ctx)){
+            if (agreed(ctx) === 1) {
+                console.log("svd")
+                await ctx.scene.enter('start')
+            }
+            if (agreed(ctx)>=3){
                 const callbackQuery = ctx.callbackQuery.data
                 if (ctx.i18n.locale() !== callbackQuery){
                     ctx.i18n.locale(callbackQuery)
@@ -240,10 +233,9 @@ module.exports.setCommands = (bot) => {
                     await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);
                     const message = ctx.i18n.t('change')
                     await ctx.replyWithHTML(message)
-                    this.menuMessage(ctx)
-                
+                    this.menuMessage(ctx)              
             }}
-    }catch(e){}
+    }catch(e){console.log(e)}
     })
 
     bot.command('admin', async ctx => {
@@ -258,28 +250,38 @@ module.exports.setCommands = (bot) => {
             await ctx.reply(`${ctx.i18n.t('admin')}`)
         }catch(e){}
       })
-    
-    bot.hears(match('lang'), async ctx => {
-        if (isUserInBd(ctx))
-            langChange(ctx)
-    })
 
     bot.hears(/🙋/, async ctx =>{
-        if (isUserInBd(ctx)){                
+        if (agreed(ctx)>=3){                
             require('./Fond').askFunction(ctx)
             await ctx.scene.enter('🎩')
         }
     })
 
     bot.hears(/🔎/, async ctx => {           
-        if (isUserInBd(ctx)){
+        if (agreed(ctx)>=3){
             await ctx.scene.enter('🌎')
         }
     }) 
 
     bot.hears(/🔙/, async ctx => {  
-        if (isUserInBd(ctx)) require("./helper").menuMessage(ctx)   
+        if (agreed(ctx)>=3) require("./helper").menuMessage(ctx)   
     }) 
+
+    bot.hears(/📝/, async ctx => {
+        if (agreed(ctx)>=3) require('../bot').test(ctx)
+    })
+
+    bot.hears(/📚/, async ctx => {
+        if (agreed(ctx) >=3) require("./helper").menuMessage(ctx)  
+    })
+
+    bot.hears(/✅$/, async ctx => {
+        if (agreed(ctx)===2) {
+            await ctx.scene.enter('start') 
+        }
+    })
+
 }
 
 async function langChange(ctx){
@@ -295,34 +297,34 @@ async function langChange(ctx){
 
 module.exports.menuMessage = async (ctx) =>
 {
-    await ctx.scene.leave()
-    await ctx.replyWithHTML(`${ctx.i18n.t('scenes.menu.text')}`, Extra.HTML()
-    .markup(Markup.keyboard(
-        [
-            [`${ctx.i18n.t('scenes.menu.buttons.ser')}`,
-            `${ctx.i18n.t('scenes.menu.buttons.prod')}`],
-            [`${ctx.i18n.t('scenes.menu.buttons.res')}`,
-            `${ctx.i18n.t('scenes.menu.buttons.news')}`],
-            [`${ctx.i18n.t('scenes.menu.buttons.qust')}`,
-            `${ctx.i18n.t('scenes.menu.buttons.about_us')}`],
-            [`${ctx.i18n.t('lang')}`]
-        ]).resize()))
+    try{
+        await ctx.scene.leave()
+        await ctx.replyWithHTML(`${ctx.i18n.t('scenes.menu.text')}`, Extra.HTML()
+        .markup(Markup.keyboard(
+            [
+                [`${ctx.i18n.t('scenes.menu.buttons.ser')}`,
+                `${ctx.i18n.t('scenes.menu.buttons.prod')}`],
+                [`${ctx.i18n.t('scenes.menu.buttons.res')}`,
+                `${ctx.i18n.t('scenes.menu.buttons.news')}`],
+                [`${ctx.i18n.t('scenes.menu.buttons.qust')}`,
+                `${ctx.i18n.t('scenes.menu.buttons.about_us')}`],
+                [`${ctx.i18n.t('lang')}`]
+            ]).resize()))
+        }catch(e){}
 }
 
-function isUserInBd(ctx){
-    if (flag) return flag
-
+function agreed(ctx){
+    let step = 0
     users.forEach(user => {
-        if ( ctx.chat.id === user.id){
-            flag = true
+        if (ctx.chat.id === user.id){
             try{
+            if (ctx.i18n.locale()!==user.lang)
                 ctx.i18n.locale(user.lang)
-            }catch(e){}
-            return
+            step = user.step   
+            }catch(e){}    
         }
     });
-
-    return flag
+    return step
 }
 
 async function prodMessage(ctx){
@@ -372,3 +374,25 @@ function convertKeyboard(element, ctx){
     })
     return keyboard
 }
+
+async function loadSer(ctx){
+    try{
+        if (messageS){
+            ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
+        }
+        
+        const promise = queryService.getAll()
+
+        promise.then(async (data) =>{
+            listS = data
+            if (listS.length !== 0){
+                indexS = parseInt((listS.length / 2), 10)
+                serMessage(ctx)
+            }else {
+                ctx.reply("Извините, пока нет ни одной услуги")
+            }                           
+        }).catch( err => console.log(err))               
+    }catch(e){console.log(e)}
+}
+
+module.exports.loadSer = loadSer
