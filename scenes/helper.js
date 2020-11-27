@@ -61,9 +61,9 @@ module.exports.setCommands = (bot) => {
         try{
             let flag = false
             docs.forEach(async item => {   
-                console.log(item.file_name.split('-')[1].substr(3,7)) 
                 if( item.file_name.startsWith(ctx.update.callback_query.message.text) && item.file_name.split('-')[1].substr(3,7) === ctx.callbackQuery.data.substr(5)){
                     flag = true
+                    
                     await ctx.telegram.sendDocument(ctx.chat.id, item.file_id)                   
                 }
             })
@@ -425,6 +425,7 @@ async function loadSer(ctx){
     }catch(e){console.log(e)}
 }
 async function availibleDates(ctx){
+
     let set = new Set()
     docs.forEach(async item => {
         if( item.file_name.startsWith(ctx.callbackQuery.data)){
