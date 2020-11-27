@@ -72,6 +72,7 @@ module.exports.setCommands = (bot) => {
      })
 
     bot.hears(/📈/, async ctx => {
+        if (agreed(ctx)>=3)
         await ctx.replyWithHTML(`${ctx.i18n.t('scenes.reports.text')}`, Extra.HTML().markup(Markup.inlineKeyboard([
             [Markup.callbackButton(`${ctx.i18n.t('scenes.reports.buttons.shares')}`, 'Акции')],
             [Markup.callbackButton(`IPO`, 'IPO')],
@@ -210,7 +211,6 @@ module.exports.setCommands = (bot) => {
     bot.hears(/❓/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         {
             if (agreed(ctx)>=3){
-                console.log(ctx.from.id)
                 await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.list')}`, Extra.HTML().markup(Markup.inlineKeyboard(convertKeyboard(answers.values, ctx)))) 
             }
         }  
@@ -230,8 +230,8 @@ module.exports.setCommands = (bot) => {
             if (element){
                 ctx.webhookReply = false
                 await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ques', {
-                    question: element.question,
-                    answer: element.answer
+                    question: element.question[dict[ctx.i18n.locale()]],
+                    answer: element.answer[dict[ctx.i18n.locale()]]
                 })}`)
                 ctx.webhookReply = true
             }
@@ -248,7 +248,6 @@ module.exports.setCommands = (bot) => {
     bot.action(/ru|en/, async ctx => {
         try{
             if (agreed(ctx) === 1) {
-                console.log("svd")
                 await ctx.scene.enter('start')
             }
             if (agreed(ctx)>=3){
@@ -398,11 +397,15 @@ async function serMessage(ctx){
         return false       
     }
 }
+const dict = {
+    "ru" : 0,
+    "en" : 1
+}
 
 function convertKeyboard(element, ctx){
     var keyboard = []
     element.forEach((item, i) => {
-        keyboard.push([Markup.callbackButton(item.question, `ques#${item.id}`)])
+        keyboard.push([Markup.callbackButton(item.question[dict[ctx.i18n.locale()]], `ques#${item.id}`)])
     })
     return keyboard
 }
