@@ -1,4 +1,4 @@
-const Product = require('../models/Product')
+const Product = require('../models/ProductLang')
 
 module.exports.getAll = async function() {
     try{

@@ -2,8 +2,8 @@ const Markup = require('telegraf/markup')
 const Extra = require('telegraf/extra')
 const bcrypt = require('bcryptjs')
 const { match } = require('telegraf-i18n')
-const queryProduct = require('../util/queryProduct');
-const queryService = require('../util/queryService');
+const queryProduct = require('../util/queryProductLang');
+const queryService = require('../util/queryServiceLang');
 const docsFileName = '../data/documents.json'
 const docs = require(docsFileName)
 
@@ -81,14 +81,14 @@ module.exports.setCommands = (bot) => {
 
     // Товары
     
-    bot.hears(/🛍/, async ctx =>  {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
+    bot.hears(/👨🏻‍💻/, async ctx =>  {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         if (agreed(ctx)>=3){
             try{
                 if (messageP){
                     ctx.telegram.deleteMessage(messageP.chat.id, messageP.message_id)
                 }
 
-                const promise = queryProduct.getAll()
+                const promise = queryProduct.getAll(ctx)
 
                 promise.then(async (data) =>{
                     listP = data
@@ -106,7 +106,7 @@ module.exports.setCommands = (bot) => {
     bot.action('leftP', async ctx => {
         try{
             if (!listP){
-                const promise = queryProduct.getAll()
+                const promise = queryProduct.getAll(ctx)
 
                 promise.then(async (data) =>{
                     listP = data
@@ -130,7 +130,7 @@ module.exports.setCommands = (bot) => {
     bot.action('rightP', async ctx => {
         try{
             if (!listP){
-                const promise = queryProduct.getAll()
+                const promise = queryProduct.getAll(ctx)
 
                 promise.then(async (data) =>{
                     listP = data
@@ -161,7 +161,7 @@ module.exports.setCommands = (bot) => {
     bot.action('leftS', async ctx => {
         try{
             if (!listS){
-                const promise = queryService.getAll()
+                const promise = queryService.getAll(ctx)
 
                 promise.then(async (data) =>{
                     listS = data
@@ -185,7 +185,7 @@ module.exports.setCommands = (bot) => {
     bot.action('rightS', async ctx => {
         try{
             if (!listS){
-                const promise = queryService.getAll()
+                const promise = queryService.getAll(ctx)
 
                 promise.then(async (data) =>{
                     listS = data
@@ -372,6 +372,7 @@ async function prodMessage(ctx){
         ctx.webhookReply = true
             return true
     }catch(e){
+        console.log(e)
         ctx.webhookReply = true
         return false       
     }
@@ -392,6 +393,7 @@ async function serMessage(ctx){
         ctx.webhookReply = true
             return true
     }catch(e){
+        console.log(e)
         ctx.webhookReply = true
         return false       
     }
@@ -411,7 +413,7 @@ async function loadSer(ctx){
             ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
         }
         
-        const promise = queryService.getAll()
+        const promise = queryService.getAll(ctx)
 
         promise.then(async (data) =>{
             listS = data
