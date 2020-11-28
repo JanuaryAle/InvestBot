@@ -71,3 +71,7 @@ async function printPortion(k, ctx){
         })
     }
 } 
+
+async function show(ctx){  
+    printPortion(2, ctx)  
+}
