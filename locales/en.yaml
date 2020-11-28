@@ -52,11 +52,11 @@ abort:
   button: ✖️ Cancel
 scenes:
   reports: 
-  text: |
-    In this section you can see the company's results:
-  buttons:
-    shares: Shares
-    adv: Advisors
+    text: |
+      In this section you can see the company's results:
+    buttons:
+      shares: Shares
+      adv: Advisors
   menu: 
     text: |
       <b>What can I do for you?</b>👨🏼‍💻
