@@ -48,7 +48,9 @@ class SceneGenerator{
 
 module.exports = new SceneGenerator().GetNewsScene()
 
-module.exports.show = async function show(ctx){  
+module.exports.show = show
+
+async function show(ctx){  
     printPortion(2, ctx)  
 }
 
@@ -71,7 +73,3 @@ async function printPortion(k, ctx){
         })
     }
 } 
-
-async function show(ctx){  
-    printPortion(2, ctx)  
-}
