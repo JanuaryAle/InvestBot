@@ -22,6 +22,7 @@ const path = require("path")
 const start = require('./scenes/Start')
 const news = require('./scenes/News')
 const fond = require('./scenes/Fond')
+const admin = require('./scenes/Admin')
 
 const mongoose = require('mongoose')
 const bodyParser = require('koa-bodyparser');
@@ -53,11 +54,6 @@ let isTesting = false
 
 bot.use(async (ctx, next) => {
     const start = new Date()
-    try{
-        if (isTesting && ctx.update.message && ctx.update.message.text && !ctx.update.message.text.startsWith('📝')) isTesting = false
-        if (ctx.update.poll){
-            if (isTesting && ctx.update.poll.id === pollMessage.poll.id) acceptAnswer(ctx)
-    }}catch(e){}
     await next()
     const response_time = new Date() - start
     console.log(`(Response Time: ${response_time})`)
@@ -67,33 +63,26 @@ bot.use(session())
 bot.use(i18n.middleware());
 bot.use(stage.middleware())
 
-stage.register(start, news, fond) 
+stage.register(start, news, fond, admin) 
 
 require('./scenes/helper').setCommands(bot)
 
-// bot.hears('а', async ctx => {
-//     docs.forEach(element => {
-//         ctx.telegram.sendDocument(ctx.chat.id, element.file_id)
-//     });
+let polls
+let index
+let pollAnswers
 
-//     if (docs.length === 0){
-//         ctx.reply("Файлов пока нет")
-//     }  
-// })
-
-// bot.on('message', async ctx => {
-//     try{
-//         if (ctx.update.message.document){
-//         const tmp = {
-//             file_name : ctx.update.message.document.file_name,
-//             file_id : ctx.update.message.document.file_id
-//         }
-//         docs.push(tmp)
-//         await fs.writeFileSync("data/documents.json", `${JSON.stringify(docs)}`);
-//         await ctx.reply(`Файл ${tmp.file_name} получен`)
-//     }
-//     }catch(e){}
-// })
+bot.action(/answer:/, async ctx => {
+    try{
+        const result = +ctx.callbackQuery.data.substr(7)
+        pollAnswers.push(result)
+        if (index === polls.length){
+            ctx.telegram.editMessageText(pollMessage.chat.id, pollMessage.message_id, undefined, "Ваш результат: \n" + pollAnswers)   
+            isTesting = false    
+        }else{
+            printPoll(ctx)
+        }
+    }catch(e){}
+})
 
 if (process.env.NODE_ENV === "production")
 {
@@ -104,18 +93,14 @@ if (process.env.NODE_ENV === "production")
 
 module.exports = bot
 
-let polls
-let index
-let context
-let pollAnswers
-
 module.exports.test = startTest
+
 async function startTest(ctx){
     try{    
         polls = require('./data/polls.json')
         index = 0
         pollAnswers = []
-        context = ctx
+        pollMessage = false
         await ctx.replyWithHTML(`Количество вопросов: ${polls.length}`,  Extra.HTML().markup(Markup.keyboard(
         [
         [`${ctx.i18n.t('menu')}`], [`${ctx.i18n.t('over')}` ]                 
@@ -126,34 +111,24 @@ async function startTest(ctx){
     }catch(e){console.log(e)}
 }
 
-function acceptAnswer(ctx){
-    try{
-    ctx.update.poll.options.forEach((element, i) => {
-        if (element.voter_count === 1){
-            pollAnswers.push(i)
-        }
-    });
-    if (index === polls.length){
-        context.reply("Ваш результат: \n" + pollAnswers)   
-        isTesting = false    
-    }else{
-        printPoll(ctx)
-    }
-}catch(e){}
-}
-
 async function printPoll(ctx){
-    try{     
-        if (pollMessage) {
-            context.telegram.deleteMessage(pollMessage.chat.id, pollMessage.message_id)
-        }     
+    try{
         const poll = polls[index]
-        context.webhookReply = false
-        pollMessage = await context.replyWithPoll(
-            poll.question,
-            poll.answers
-        )
-        context.webhookReply = true
+        if (pollMessage) {
+            ctx.telegram.deleteMessage(pollMessage.chat.id, pollMessage.message_id)
+        }
+
+        ctx.webhookReply = false     
+        pollMessage = await ctx.replyWithHTML(poll.question, Extra.HTML().markup(Markup.inlineKeyboard(convert(poll.answers))))
+        ctx.webhookReply = true 
         index++
     }catch(e){console.log(e)}
+}
+
+function convert(array){
+    const keyboard = []
+    array.forEach((element, i) => {
+        keyboard.push([Markup.callbackButton(element, `answer:${i}`)])
+    });
+    return keyboard
 }
