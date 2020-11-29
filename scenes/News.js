@@ -19,7 +19,7 @@ class SceneGenerator{
         list = []
         flag = true
         printPortion(3, ctx)
-        await ctx.reply(`${ctx.i18n.t('scenes.news.text')}`, Extra.HTML({parse_mode: 'HTML'})
+        await ctx.reply(`👇${ctx.i18n.t('scenes.news.text')}`, Extra.HTML({parse_mode: 'HTML'})
         .markup(Markup.keyboard(
             [[`${ctx.i18n.t('scenes.news.buttons.more')}`], [`${ctx.i18n.t('retry')}`]]).resize()))
         }) 

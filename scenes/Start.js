@@ -66,7 +66,7 @@ class SceneGenerator{
                 ctx.i18n.locale(callbackQuery);
                 user.lang = callbackQuery
                 step1(ctx)
-                return ctx.wizard.next()
+                return await ctx.wizard.next()
             }catch(e){}
         }, async ctx => {
             try{
@@ -78,7 +78,7 @@ class SceneGenerator{
             try{
                 if (ctx.message.text == `${ctx.i18n.t('start.acception.button')}`){
                     step2(ctx)
-                    return ctx.wizard.next()
+                    return await ctx.wizard.next()
                 }
             }catch(e){console.log(e)}
         }, async ctx => {
@@ -92,22 +92,9 @@ class SceneGenerator{
                 if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.ready')}`){ 
                     step3(ctx)
                 }else if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.know')}`){
-                    step4(ctx)  
-                    return ctx.wizard.next()            
+                    step4(ctx)   
                 }
             }catch(e){}
-        }, async ctx => {
-            if (ctx.update.callback_query.message.text.startsWith("👨‍💼")){
-                require("./helper").loadSer(ctx)
-                require("./helper").menuMessage(ctx)
-            }
-        })
-
-        item.hears(/👨‍💼/, async ctx => {
-            if (step >= 3){
-                require("./helper").loadSer(ctx)
-                require("./helper").menuMessage(ctx)
-            }
         })
         return item
     }
@@ -158,13 +145,13 @@ async function step1(ctx){
         userFirstName: ctx.from.first_name,
         name: file.fondInfo.name
     }))
-    await ctx.replyWithHTML(ctx.i18n.t('start.acception.text'), Extra.HTML()
+    await ctx.replyWithHTML(`👇${ctx.i18n.t('start.acception.text')}`, Extra.HTML()
         .markup(Markup.keyboard([`${ctx.i18n.t('start.acception.button')}` ]).resize()))
     user.step = 2
     await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);
 }
 async function step2(ctx){
-    await ctx.replyWithHTML(`${ctx.i18n.t('start.great.text')}`,
+    await ctx.replyWithHTML(`👇${ctx.i18n.t('start.great.text')}`,
         Extra.HTML()
         .markup(Markup.keyboard(
         [
@@ -184,10 +171,11 @@ async function step4(ctx){
     user.step = 4
     await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);
     
-    await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.about_us')}`,
+    await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.about_us')}`,
         Extra.HTML()
-        .markup(Markup.keyboard(
+        .markup(Markup.inlineKeyboard(
         [
-            `${ctx.i18n.t('start.great.buttons.continue')}`,                 
-        ]).resize()))  
+            Markup.callbackButton(`${ctx.i18n.t('start.great.buttons.continue')}`, 'cont')         
+        ])))
+    require("./helper").menuMessage(ctx)
 }

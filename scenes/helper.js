@@ -75,7 +75,7 @@ module.exports.setCommands = (bot) => {
 
     bot.hears(/📈/, async ctx => {
         if (agreed(ctx)>=3)
-        await ctx.replyWithHTML(`${ctx.i18n.t('scenes.reports.text')}`, Extra.HTML().markup(Markup.inlineKeyboard([
+        await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.reports.text')}`, Extra.HTML().markup(Markup.inlineKeyboard([
             [Markup.callbackButton(`${ctx.i18n.t('scenes.reports.buttons.shares')}`, 'Акции')],
             [Markup.callbackButton(`IPO`, 'IPO')],
             [Markup.callbackButton(`${ctx.i18n.t('scenes.reports.buttons.adv')}`, "Советники")],
@@ -213,7 +213,7 @@ module.exports.setCommands = (bot) => {
     bot.hears(/❓/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         {
             if (agreed(ctx)>=3){
-                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.list')}`, Extra.HTML().markup(Markup.inlineKeyboard(convertKeyboard(answers.values, ctx)))) 
+                await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.list')}`, Extra.HTML().markup(Markup.inlineKeyboard(convertKeyboard(answers.values, ctx)))) 
             }
         }  
     );
@@ -231,7 +231,7 @@ module.exports.setCommands = (bot) => {
             })
             if (element){
                 ctx.webhookReply = false
-                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ques', {
+                await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.ques', {
                     question: element.question[dict[ctx.i18n.locale()]],
                     answer: element.answer[dict[ctx.i18n.locale()]]
                 })}`)
@@ -268,6 +268,10 @@ module.exports.setCommands = (bot) => {
                     this.menuMessage(ctx)              
             }}
     }catch(e){console.log(e)}
+    })
+
+    bot.action('cont', async ctx => {
+        require("./helper").loadSer(ctx)
     })
 
     bot.command('admin', async ctx => {
@@ -331,7 +335,10 @@ module.exports.setCommands = (bot) => {
     }) 
 
     bot.hears(/📝/, async ctx => {
-        if (agreed(ctx)>=3) require('../bot').test(ctx)
+        if (agreed(ctx)>=3) {
+            await ctx.scene.leave()
+            require('../bot').test(ctx)
+        }
     })
 
     bot.hears(/📚/, async ctx => {
@@ -366,7 +373,7 @@ const menuMessage = async (ctx) =>
 {
     try{
         await ctx.scene.leave()
-        await ctx.replyWithHTML(`${ctx.i18n.t('scenes.menu.text')}`, Extra.HTML()
+        await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.menu.text')}`, Extra.HTML()
         .markup(Markup.keyboard(
             [
                 [`${ctx.i18n.t('scenes.menu.buttons.ser')}`,
