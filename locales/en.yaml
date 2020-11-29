@@ -31,7 +31,7 @@ start:
     buttons:
       ready: 📝 Fill out the form
       know: 🎩 Acquaint
-      continue: 👩🏻‍🔧 List of services 
+      continue: 👨‍💼 List of services 
 help: |
   <b>It's pretty easy to communicate with me:</b>
 
@@ -135,7 +135,7 @@ scenes:
       ser:
         left: Previous
         right: Next
-      order: order
+      order: Order
       prod:
         left: Previous
         right: Next

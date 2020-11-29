@@ -343,6 +343,12 @@ module.exports.setCommands = (bot) => {
             await ctx.scene.enter('start') 
         }
     })
+    bot.hears(/👨‍💼/, async ctx => {
+        if (agreed(ctx) >= 3){
+            loadSer(ctx)
+            menuMessage(ctx)
+        }
+    })
 }
 
 async function langChange(ctx){
@@ -356,7 +362,7 @@ async function langChange(ctx){
     )
 }
 
-module.exports.menuMessage = async (ctx) =>
+const menuMessage = async (ctx) =>
 {
     try{
         await ctx.scene.leave()
@@ -388,6 +394,7 @@ function agreed(ctx){
     });
     return step
 }
+module.exports.menuMessage = menuMessage
 
 async function prodMessage(ctx){
     try{

@@ -92,18 +92,21 @@ class SceneGenerator{
                 if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.ready')}`){ 
                     step3(ctx)
                 }else if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.know')}`){
-                    step4(ctx)              
+                    step4(ctx)  
+                    return ctx.wizard.next()            
                 }
             }catch(e){}
         }, async ctx => {
-
+            if (ctx.update.callback_query.message.text.startsWith("👨‍💼")){
+                require("./helper").loadSer(ctx)
+                require("./helper").menuMessage(ctx)
+            }
         })
 
-        item.hears(/👩🏻‍🔧/, async ctx => {
+        item.hears(/👨‍💼/, async ctx => {
             if (step >= 3){
                 require("./helper").loadSer(ctx)
                 require("./helper").menuMessage(ctx)
-                await ctx.scene.leave() 
             }
         })
         return item
@@ -175,7 +178,7 @@ async function step3(ctx){
     user.step = 4
     await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);       
     require("../bot").test(ctx)
-    ctx.scene.leave()
+    await ctx.scene.leave()
 }
 async function step4(ctx){
     user.step = 4
