@@ -18,6 +18,8 @@ let messageP
 let listP
 let indexP
 
+let send
+
 let messageS
 let listS
 let indexS
@@ -270,16 +272,46 @@ module.exports.setCommands = (bot) => {
 
     bot.command('admin', async ctx => {
         try{
-            let m = ctx.message.text.split(" ")
-            m = m.filter(item => item != "")
-            const password = m[1]
+            const user = users.filter(user => user.id === ctx.chat.id)[0]
+            if (user.adm) ctx.scene.enter('admin')
+            else{
+                let m = ctx.message.text.split(" ")
+                m = m.filter(item => item != "")
+                const password = m[1]
 
-            // if (bcrypt.compareSync(password, process.env.ADMIN_PASSWORD))
-            //   //   ctx.scene.enter('admin')
-            // else
-            await ctx.reply(`${ctx.i18n.t('admin')}`)
+                if (bcrypt.compareSync(password, process.env.ADMIN_PASSWORD)){
+                    user.adm = true
+                    await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);
+                    ctx.scene.enter('admin')
+                }else
+                    await ctx.reply(`${ctx.i18n.t('admin')}`)
+        }
         }catch(e){}
       })
+
+    // bot.action('заказатьP', async ctx => {           
+    //     try{
+    //         const question = {
+    //             type: 
+    //             message: ctx.update.message.text,
+    //             userId: ctx.update.message.from.id,
+    //             userFirstName: ctx.update.message.from.first_name
+    //         }
+    //         await ctx.telegram.sendMessage(CHAT_ID,
+    //             `<b>Вам только что поступил вопрос от пользователя</b>\n<a href="tg://user?id=${question.userId}">${question.userFirstName}</a>: \n${ctx.update.message.text}`,
+    //             Extra.HTML())
+    //         await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ask.order')}`, 
+    //             Extra.HTML().markup(Markup.keyboard(
+    //                 [[`${ctx.i18n.t('scenes.fond.buttons.ask')}`], 
+    //                 [`${ctx.i18n.t('scenes.menu.buttons.ser')}`], 
+    //                 [`${ctx.i18n.t('retry')}`]]).resize()))
+    //         asking = false
+    //         clearTimeout(timeout)
+    //     }catch(e){}
+    // }) 
+    // bot.action('заказатьS', async ctx => {           
+
+    // }) 
 
     bot.hears(/🙋/, async ctx =>{
         if (agreed(ctx)>=3){                
@@ -364,8 +396,8 @@ async function prodMessage(ctx){
                 caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[indexP].name, price: listP[indexP].price, description: listP[indexP].description})}\n(${indexP + 1}\\${listP.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
-                [Markup.callbackButton('Предыдущий товар', 'leftP'), Markup.callbackButton('Следующий товар', 'rightP')],
-                [Markup.callbackButton('Заказать', 'заказатьP')]
+                [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.left')}`, 'leftP'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.right')}`, 'rightP')],
+                [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.order')}`, 'заказатьP')]
             ])))
         messageP = mes
         ctx.webhookReply = true
@@ -385,8 +417,8 @@ async function serMessage(ctx){
                 caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[indexS].name, price: listS[indexS].price, description: listS[indexS].description})}\n(${indexS + 1}\\${listS.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
-                [Markup.callbackButton('Предыдущая услуга', 'leftS'), Markup.callbackButton('Следующая услуга', 'rightS')],
-                [Markup.callbackButton('Заказать', 'заказатьS')]
+                [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.ser.right')}`, 'leftS'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.ser.right')}`, 'rightS')],
+                [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.order')}`, 'заказатьS')]
             ])))
         messageS = mes
         ctx.webhookReply = true
@@ -456,7 +488,6 @@ async function availibleDates(ctx){
         keyboard[keyboard.length] = mini
     }
 
-    console.log(keyboard)
     if (set.size === 0)
     {
         await ctx.replyWithHTML('Пока записей нет')

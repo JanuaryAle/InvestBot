@@ -109,6 +109,8 @@ scenes:
       ok: Ваше обращение успешно отправлено!
       err: Пожалуйста, напишите нам текстом, мы обратимся к вам, чтобы поговорить детально.
       end: Время ожидания вопроса истекло, если вы все еще хотите задать вопрос, нажмите снова на "Задайте вопрос".
+      order: 
+      alright: Our Manager will write to you in the near future about the order, thank you for taking an interest.
   news:
     text: | 
       <b>Вы зашли в раздел Новостной ленты</b>
@@ -134,13 +136,13 @@ scenes:
 
       ${description}
     buttons:
-    ser:
-      left: Previous service
-      right: Next service
-    order: Order
-    prod:
-      left: Предыдущий товар
-      right: Следующий товар
+      ser:
+        left: Previous service
+        right: Next service
+      order: Order
+      prod:
+        left: Предыдущий товар
+        right: Следующий товар
   vic:
     text: |
       <b>Вот вы и в разделе обучения!</b>

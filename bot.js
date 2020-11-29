@@ -119,7 +119,7 @@ async function printPoll(ctx){
         }
 
         ctx.webhookReply = false     
-        pollMessage = await ctx.replyWithHTML(poll.question, Extra.HTML().markup(Markup.inlineKeyboard(convert(poll.answers))))
+        pollMessage = await ctx.replyWithHTML(poll.question, Extra.HTML().markup(Markup.inlineKeyboard(convert(poll.answers)).resize()))
         ctx.webhookReply = true 
         index++
     }catch(e){console.log(e)}
