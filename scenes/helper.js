@@ -382,6 +382,7 @@ function agreed(ctx){
             if (ctx.i18n.locale()!==user.lang)
                 ctx.i18n.locale(user.lang)
             step = user.step   
+            console.log(step)
             }catch(e){}    
         }
     });
