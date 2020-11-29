@@ -100,9 +100,11 @@ class SceneGenerator{
         })
 
         item.hears(/👩🏻‍🔧/, async ctx => {
-            require("./helper").loadSer(ctx)
-            require("./helper").menuMessage(ctx)
-            await ctx.scene.leave() 
+            if (step >= 3){
+                require("./helper").loadSer(ctx)
+                require("./helper").menuMessage(ctx)
+                await ctx.scene.leave() 
+            }
         })
         return item
     }
@@ -173,6 +175,7 @@ async function step3(ctx){
     user.step = 4
     await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);       
     require("../bot").test(ctx)
+    ctx.scene.leave()
 }
 async function step4(ctx){
     user.step = 4
