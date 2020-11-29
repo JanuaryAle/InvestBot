@@ -81,7 +81,7 @@ bot.action(/answer:/, async ctx => {
         }else{
             printPoll(ctx)
         }
-    }catch(e){}
+    }catch(e){console.log(e)}
 })
 
 if (process.env.NODE_ENV === "production")
