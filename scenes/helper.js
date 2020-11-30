@@ -27,11 +27,7 @@ let indexS
 module.exports.setCommands = (bot) => {
 
     bot.start( async ctx => {
-        //if (!agreed(ctx)){
-            await ctx.scene.enter('start')
-        // }else {
-        //     await ctx.scene.enter('menu')
-        // }
+        await ctx.scene.enter('start')
     })
 
     bot.hears(/🌎|🎩/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  

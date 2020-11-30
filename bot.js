@@ -55,6 +55,9 @@ let isTesting = false
 bot.use(async (ctx, next) => {
     const start = new Date()
     await next()
+    require('./data/userlist.json').forEach(element => {
+        if (element.id === ctx.chat.id) console.log(element.step)
+    })
     const response_time = new Date() - start
     console.log(`(Response Time: ${response_time})`)
   })
@@ -68,8 +71,8 @@ stage.register(start, news, fond, admin)
 require('./scenes/helper').setCommands(bot)
 
 let polls
-let index
-let pollAnswers
+let index = 0
+let pollAnswers = []
 
 bot.action(/answer:/, async ctx => {
     try{
