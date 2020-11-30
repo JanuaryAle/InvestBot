@@ -107,6 +107,7 @@ async function selectStep(ctx){
         users.forEach(item => {
             if (item.id === ctx.chat.id){
                 user = item
+                ctx.i18n.locale(user.lang);
             }
         })
         if (user){
