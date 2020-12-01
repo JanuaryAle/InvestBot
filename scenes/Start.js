@@ -12,40 +12,41 @@ class SceneGenerator{
         const item = new WizardScene('start', 
         async (ctx) => {
             try{
+            ctx.webhookReply = false
             await selectStep(ctx)
             console.log("selectStepExit: " + user)
             switch(user.step){
                 case 2: {
                     if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") {
-                        step1(ctx)
+                        await step1(ctx)
                         return ctx.wizard.selectStep(2)
                     }else{
-                        step2(ctx)
+                        await step2(ctx)
                         return ctx.wizard.selectStep(3)
                     }
                 }
                 case 3: {
-                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") step2(ctx)
+                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") await step2(ctx)
                     return ctx.wizard.selectStep(3)
                 }
                 case 4: {
-                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") step4(ctx)
+                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") await step4(ctx)
                     break
                 }
                 case 1: {
                     if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") {
-                        step0(ctx)
+                        await step0(ctx)
                         return ctx.wizard.next()
                     }else if (ctx.callbackQuery){
                         const callbackQuery = ctx.callbackQuery.data
                         ctx.i18n.locale(callbackQuery);
                         user.lang = callbackQuery
-                        step1(ctx)
+                        await step1(ctx)
                         return ctx.wizard.selectStep(2)
                     }
                 } 
                 default: {
-                    step0(ctx)
+                    await step0(ctx)
                     return ctx.wizard.next()
                 }
             }}catch(e){console.log(e)}
@@ -62,7 +63,7 @@ class SceneGenerator{
                 ctx.i18n.locale(callbackQuery);
                 user.lang = callbackQuery
                 await queryUser.update(user)
-                step1(ctx)
+                await step1(ctx)
                 return ctx.wizard.next()
             }catch(e){console.log(e)}
         }, async ctx => {
@@ -74,7 +75,7 @@ class SceneGenerator{
                 }}catch(e){console.log(e)}
             try{
                 if (ctx.message.text == `${ctx.i18n.t('start.acception.button')}`){
-                    step2(ctx)
+                    await step2(ctx)
                     return ctx.wizard.next()
                 }
             }catch(e){console.log(e)}
@@ -87,9 +88,9 @@ class SceneGenerator{
                 }}catch(e){console.log(e)}
             try{
                 if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.ready')}`){ 
-                    step3(ctx)
+                    await step3(ctx)
                 }else if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.know')}`){
-                    step4(ctx)   
+                    await step4(ctx)   
                 }
             }catch(e){console.log(e)}
         })
@@ -114,7 +115,6 @@ async function selectStep(ctx){
 }
 
 async function step0(ctx){
-    ctx.webhookReply = false
     await ctx.reply(`${ctx.i18n.t('selectLang')}`,
     Extra.HTML().markup(Markup.inlineKeyboard(
         [
@@ -122,25 +122,24 @@ async function step0(ctx){
             Markup.callbackButton('🇷🇺 Русский', 'ru')
         ]
     )))
-    ctx.webhookReply = true
     user.step = 1
     await queryUser.update(user)
 }
 async function step1(ctx){
 
-    await ctx.replyWithHTML(ctx.i18n.t('change'))
-    await ctx.replyWithHTML(ctx.i18n.t('start.hello', {
+     ctx.replyWithHTML(ctx.i18n.t('change'))
+     ctx.replyWithHTML(ctx.i18n.t('start.hello', {
         userId: ctx.from.id,
         userFirstName: ctx.from.first_name,
         name: file.fondInfo.name
     }))
-    await ctx.replyWithHTML(`👇${ctx.i18n.t('start.acception.text')}`, Extra.HTML()
+     ctx.replyWithHTML(`👇${ctx.i18n.t('start.acception.text')}`, Extra.HTML()
         .markup(Markup.keyboard([`${ctx.i18n.t('start.acception.button')}` ]).resize()))
     user.step = 2
     await queryUser.update(user)
 }
 async function step2(ctx){
-    await ctx.replyWithHTML(`👇${ctx.i18n.t('start.great.text')}`,
+     ctx.replyWithHTML(`👇${ctx.i18n.t('start.great.text')}`,
         Extra.HTML()
         .markup(Markup.keyboard(
         [
@@ -160,7 +159,7 @@ async function step4(ctx){
     user.step = 4
     await queryUser.update(user)
     
-    await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.about_us')}`,
+    ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.about_us')}`,
         Extra.HTML()
         .markup(Markup.inlineKeyboard(
         [
