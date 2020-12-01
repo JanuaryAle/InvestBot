@@ -3,8 +3,8 @@ require('dotenv').config()
 
 const fs = require('fs');
 let pollMessage
-const usersFileName = './data/userlist.json'
-const users = require(usersFileName)
+let timeout
+const queryUser = require('./util/queryUser');
 
 const docsFileName = './data/documents.json'
 const docs = require(docsFileName)
@@ -26,6 +26,7 @@ const admin = require('./scenes/Admin')
 
 const mongoose = require('mongoose')
 const bodyParser = require('koa-bodyparser');
+
 
 
 mongoose.connect(process.env.MONGO_DB_PASS
@@ -55,9 +56,6 @@ let isTesting = false
 bot.use(async (ctx, next) => {
     const start = new Date()
     await next()
-    require('./data/userlist.json').forEach(element => {
-        if (element.id === ctx.chat.id) console.log(element.step)
-    })
     const response_time = new Date() - start
     console.log(`(Response Time: ${response_time})`)
   })
@@ -76,15 +74,22 @@ let pollAnswers = []
 
 bot.action(/answer:/, async ctx => {
     try{
-        const result = +ctx.callbackQuery.data.substr(7)
-        pollAnswers.push(result)
-        if (index === polls.length){
-            ctx.telegram.editMessageText(pollMessage.chat.id, pollMessage.message_id, undefined, "Ваш результат: \n" + pollAnswers)   
-            isTesting = false    
-        }else{
-            printPoll(ctx)
+        if (!pollMessage){
+            ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+            startTest(ctx)
         }
-    }catch(e){console.log(e)}
+        if (pollMessage.message_id === ctx.update.callback_query.message.message_id){
+            const result = +ctx.callbackQuery.data.substr(7)
+            pollAnswers.push(result)
+            if (index === polls.length){
+                clearTimeout(timeout)
+                ctx.telegram.editMessageText(pollMessage.chat.id, pollMessage.message_id, undefined, "Ваш результат: \n" + pollAnswers)   
+                isTesting = false
+                pollMessage = false    
+            }else{
+                printPoll(ctx)
+        }}
+    }catch(e){}
 })
 
 if (process.env.NODE_ENV === "production")
@@ -99,10 +104,15 @@ module.exports = bot
 module.exports.test = startTest
 
 async function startTest(ctx){
-    try{    
+    try{   
         polls = require('./data/polls.json')
         index = 0
         pollAnswers = []
+
+        if (pollMessage) {
+            ctx.telegram.deleteMessage(pollMessage.chat.id, pollMessage.message_id)
+        }
+
         pollMessage = false
         await ctx.replyWithHTML(`Количество вопросов: ${polls.length}`,  Extra.HTML().markup(Markup.keyboard(
         [
@@ -116,6 +126,7 @@ async function startTest(ctx){
 
 async function printPoll(ctx){
     try{
+        updateTimeout(ctx)
         const poll = polls[index]
         if (pollMessage) {
             ctx.telegram.deleteMessage(pollMessage.chat.id, pollMessage.message_id)
@@ -134,4 +145,14 @@ function convert(array){
         keyboard.push([Markup.callbackButton(element, `answer:${i}`)])
     });
     return keyboard
+}
+function updateTimeout(ctx){
+    if (timeout) clearTimeout(timeout)
+    timeout = setTimeout( ()=> {
+        if (pollMessage) {
+            ctx.telegram.deleteMessage(pollMessage.chat.id, pollMessage.message_id)
+            pollMessage = false
+        }
+        ctx.replyWithHTML("Время ожидания ответов закончено, можете заново заполнить анкету")
+    }, 900000)
 }

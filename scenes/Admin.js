@@ -1,15 +1,11 @@
 const Markup = require('telegraf/markup')
 const Extra = require('telegraf/extra')
 const Scene = require('telegraf/scenes/base')
-const { match } = require('telegraf-i18n')
-const fileNameAnswers = '../data/answers.json'
-const answers =  require(fileNameAnswers)
-const fs = require('fs');
 
 const docsFileName = '../data/documents.json'
 const queryProduct = require('../util/queryProductLang');
 const queryService = require('../util/queryServiceLang');
-const { HTML } = require('telegraf/extra')
+const queryAnswer = require('../util/queryAnswer')
 
 let docs = require(docsFileName)
 
@@ -18,6 +14,7 @@ let block = false
 let stack = []
 let listP
 let listS
+let answers
 
 const keyboard = 
     [
@@ -73,15 +70,6 @@ dictAdd = {
     "📢 Отчеты": addReport
 }
 
-async function emptyList(){
-    return []
-}
-
-async function empty(){
-    return null
-}
-
-let step = 0// тут
 let timeout
 class SceneGenerator{
 
@@ -92,6 +80,7 @@ class SceneGenerator{
             try{
             loadServices(ctx)
             loadProducts(ctx)
+            loadAnswers(ctx)
             await ctx.replyWithHTML(`<b>Добро пожаловать в режим администратора!</b> Чтобы вернуться в меню, воспользуйтесь клавиатурой...`, 
             Extra.HTML({parse_mode: 'HTML'})
             .markup(Markup.keyboard(
@@ -226,11 +215,9 @@ class SceneGenerator{
                     }catch(e){}}
             }}catch(e){}
         })
-
         item.leave(async ctx => {
             await ctx.replyWithHTML('Выход из режима администратора...')
         })
-
         return item
     }
 }
@@ -265,7 +252,7 @@ async function list(ctx, spec){
 function listFAQ()
 {
     let keyboard = []
-    answers.values.forEach((item, i) => {
+    answers.forEach((item, i) => {
         keyboard.push([Markup.callbackButton(item.question[0], `ques#${item.id}`)])
     })
     keyboard.push([Markup.callbackButton('Шаг назад', 'back')])
@@ -293,7 +280,7 @@ async function addFAQ(ctx)
 async function showQuestion(ctx){
     var id = +ctx.callbackQuery.data.split("#")[1]
     let element
-    answers.values.forEach(item => {
+    answers.forEach(item => {
         if (item.id == id){
             element = item
             return
@@ -314,21 +301,34 @@ ${element.answer[1]}`)
 
 async function deleteQuestion(ctx){
     try{
-        var id = +ctx.callbackQuery.data.split("#")[1]
-        console.log(id)
-        answers.values = answers.values.filter(item =>{
-            return item.id !== id
-        })
-        console.log(answers)
-        await fs.writeFileSync("data/answers.json", `${JSON.stringify(answers)}`);
+        let element
         await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
+        const id = +ctx.callbackQuery.data.split("#")[1]
+
+        answers.forEach(item => {
+            if (item.id == id){
+                element = item
+            }
+        })
+
+        const promise = await queryAnswer.remove(element)
+
         const scem = {text: "Элемент удален!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
-        ctx.webhookReply = false
-        message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-        ctx.webhookReply = true
+
+        if (promise){
+            ctx.webhookReply = false
+            message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
+            ctx.webhookReply = true
+            answers = answers.filter(item => item !== element)
+        }else{
+            scem.text = 'Что-то пошло не так'
+            ctx.webhookReply = false
+            message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
+            ctx.webhookReply = true
+        }        
         stack.pop()
         stack.push(scem)
-    }catch(e){}
+    }catch(e){console.log(e)}
 }
 
 async function addFaq2(ctx){
@@ -336,7 +336,7 @@ async function addFaq2(ctx){
         const element = {}
         element.question = []
         element.answer = []
-        element.id = answers.values.length > 0 ? answers.values[answers.values.length - 1].id + 1 : 0
+        element.id = answers.length > 0 ? answers[answers.length - 1].id + 1 : 0
         let text = ctx.message.text.trim()
 
         let index = text.indexOf("🇷🇺 Вопрос:")
@@ -358,16 +358,26 @@ async function addFaq2(ctx){
 
         text = text.substr(index + 12)
         element.answer[1] = text.trim()
-        answers.values.push(element)
+        
         await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
-        await fs.writeFileSync("data/answers.json", `${JSON.stringify(answers)}`);
+        const promise = await queryAnswer.create(element)
         const scem = {text: "Элемент добавлен!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
-        ctx.webhookReply = false
-        message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-        ctx.webhookReply = true
+        if (promise){
+            ctx.webhookReply = false
+            message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
+            ctx.webhookReply = true
+            answers.push(element)
+        }else{
+            scem.text = 'Что-то пошло не так'
+            ctx.webhookReply = false
+            message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
+            ctx.webhookReply = true
+        }        
+
         stack.pop()
         stack.push(scem)
-    }catch(e){ctx.reply("Данные не соотвествуют шаблону, пожалуйста повторите или отмените операцию. Элемент все еще ожидается...")}
+
+    }catch(e){ctx.reply("Введенные данные не соответствуют шаблону, пожалуйста, повторите еще раз или отмените действие...")}
 }
 
 //////////////////////////
@@ -387,7 +397,6 @@ async function addReport(ctx)
 function listReports()
 {
     try{
-        console.log(docs)
         docs.sort((a, b) => a.file_name < b.file_name ? 1 : -1)
     
         let keyboard = []
@@ -432,6 +441,14 @@ async function loadProducts(ctx){
 
     promise.then(async (data) =>{
     listP = data
+    }).catch( err => console.log(err))                      
+}
+
+async function loadAnswers(ctx){
+    const promise = queryAnswer.getAllRed(ctx)
+
+    promise.then(async (data) =>{
+        answers = data
     }).catch( err => console.log(err))                      
 }
 
@@ -503,23 +520,26 @@ async function deletePS(ctx, list){
             }
         })
 
-        const promice = list === listP ? queryProduct.remove(element) : queryService.remove(element)
+        const promise = list === listP ? await queryProduct.remove(element) : await queryService.remove(element)
 
         const scem = {text: "Элемент удален!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
 
-        promice.then(async () => {
+        if (promise){
             ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
             ctx.webhookReply = true
-            if (list === listP)
-            {
+            if (list === listP){
                 listP = listP.filter(item => item !== element)
             }else listS = listS.filter(item => item !== element) 
-        })
-        
+        }else{
+            scem.text = 'Что-то пошло не так'
+            ctx.webhookReply = false
+            message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
+            ctx.webhookReply = true
+        }        
         stack.pop()
         stack.push(scem)
-    }catch(e){}
+    }catch(e){console.log(e)}
 }
 
 async function addPS(ctx, text){
@@ -544,8 +564,7 @@ async function addPS(ctx, text){
 🇺🇸 Price:
 *
 🇷🇺 Изображение:
-*`)
-    }catch(e){}
+*`)}catch(e){}
 }
 
 async function addPS2(ctx, list){
@@ -596,17 +615,23 @@ try{
         console.log(await ctx.replyWithPhoto(element.imageSrc, Extra.load({ parse_mode: "HTML",
             caption: "Проверка фотографии пройдена"})))
 
-        const promice = list === listP ? queryProduct.create(element) : queryService.create(element)
+        const promise = list === listP ? await queryProduct.create(element) : await queryService.create(element)
         const scem = {text: "Элемент добавлен!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
 
-        promice.then(async () => {
+        if (promise){
             ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
             ctx.webhookReply = true
             list === listP ? listP.push(element) : listS.push(element)
-        })
+        }else{
+            scem.text = 'Что-то пошло не так'
+            ctx.webhookReply = false
+            message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
+            ctx.webhookReply = true
+        }        
         stack.pop()
         stack.push(scem)
-}catch(e){ctx.reply("Пожалуйста, проверьте ссылку и попробуйте еще раз, все еще принимаю элемент на добавление")}
-}catch(e){}
+
+}catch(e){ctx.reply("☝️Проверка фотографии не пройдена, пожалуйста, проверьте ссылку и отправьте текст по шаблону заново или отмените действие...")}
+}catch(e){сtc.reply("☝️Введенные данные не соответствуют шаблону, повторите или отмените действие...")}
 }

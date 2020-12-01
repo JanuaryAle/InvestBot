@@ -73,7 +73,7 @@ class FondSceneGenerator{
         
         item.leave(async ctx => {
             try{
-                await ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id)
+                ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id)
             }catch(e){}
             clearTimeout(timeout)
             asking = false
@@ -109,7 +109,7 @@ async function askFunction(ctx){
         ctx.webhookReply = true
     
         timeout = setTimeout(async () => {      
-            await ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id)               
+            ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id)               
             await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.ask.end')}`, 
             Extra.HTML({parse_mode: 'HTML'})
             .markup(Markup.keyboard(

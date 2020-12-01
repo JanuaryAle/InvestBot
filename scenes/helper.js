@@ -4,20 +4,20 @@ const bcrypt = require('bcryptjs')
 const { match } = require('telegraf-i18n')
 const queryProduct = require('../util/queryProductLang');
 const queryService = require('../util/queryServiceLang');
+const queryAnswer = require('../util/queryAnswer');
+const queryUser = require('../util/queryUser');
 const docsFileName = '../data/documents.json'
 const docs = require(docsFileName)
 
 const fs = require('fs');
+const { callbackButton } = require('telegraf/markup');
 
-const usersFileName = '../data/userlist.json'
-const users = require(usersFileName)
-const fileNameAnswers = '../data/answers.json'
-const answers =  require(fileNameAnswers)
+let user
 
 let messageP
 let listP
 let indexP
-
+let answers
 let send
 
 let messageS
@@ -27,23 +27,23 @@ let indexS
 module.exports.setCommands = (bot) => {
 
     bot.start( async ctx => {
-        await ctx.scene.enter('start')
+        ctx.scene.enter('start')
     })
 
     bot.hears(/🌎|🎩/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         {
             try{
-            if (agreed(ctx)>=3){
-                const text = ctx.message.text
-                const scene = text.charAt(0)+text.charAt(1)
-                await ctx.scene.enter(scene)
-            }}catch(e){}
+                if (await agreed(ctx)>=3){
+                    const text = ctx.message.text
+                    const scene = text.charAt(0)+text.charAt(1)
+                    ctx.scene.enter(scene)
+                }}catch(e){}
         }  
     );
 
     bot.hears(/🇺🇸|🇷🇺/, async ctx => {
-        if (agreed(ctx)>=3){
-            langChange(ctx)
+        if (await agreed(ctx)>=3){
+            await langChange(ctx)
         }
     })
 
@@ -51,26 +51,27 @@ module.exports.setCommands = (bot) => {
 
     bot.action(/Акции|IPO|Советники/, async ctx => {
         try{
-            availibleDates(ctx)
+            if (await agreed(ctx)>=3)
+            await availibleDates(ctx)
         }catch(e){console.log(e)}
     })
 
      bot.action(/data:/, async ctx => {
         try{
-            let flag = false
-            docs.forEach(async item => {   
-                if( item.file_name.startsWith(ctx.update.callback_query.message.text) && item.file_name.split('-')[1].substr(3,7) === ctx.callbackQuery.data.substr(5)){
-                    flag = true
-                    
-                    await ctx.telegram.sendDocument(ctx.chat.id, item.file_id)                   
-                }
-            })
-            if (!flag) await ctx.reply("Записей не найдено") 
-        }catch(e){console.log(e)}      
+            if (await agreed(ctx)>=3){
+                let flag = false
+                docs.forEach(async item => {   
+                    if( item.file_name.startsWith(ctx.update.callback_query.message.text) && item.file_name.split('-')[1].substr(3,7) === ctx.callbackQuery.data.substr(5)){
+                        flag = true                    
+                        await ctx.telegram.sendDocument(ctx.chat.id, item.file_id)                   
+                    }
+                })
+                if (!flag) await ctx.reply("Записей не найдено") 
+        }}catch(e){console.log(e)}      
      })
 
     bot.hears(/📈/, async ctx => {
-        if (agreed(ctx)>=3)
+        if (await agreed(ctx)>=3)
         await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.reports.text')}`, Extra.HTML().markup(Markup.inlineKeyboard([
             [Markup.callbackButton(`${ctx.i18n.t('scenes.reports.buttons.shares')}`, 'Акции')],
             [Markup.callbackButton(`IPO`, 'IPO')],
@@ -81,7 +82,7 @@ module.exports.setCommands = (bot) => {
     // Товары
     
     bot.hears(/👨🏻‍💻/, async ctx =>  {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
-        if (agreed(ctx)>=3){
+        if (await agreed(ctx)>=3){
             try{
                 if (messageP){
                     ctx.telegram.deleteMessage(messageP.chat.id, messageP.message_id)
@@ -93,9 +94,9 @@ module.exports.setCommands = (bot) => {
                     listP = data
                     if (listP.length !== 0){
                         indexP = parseInt((listP.length / 2), 10)
-                        prodMessage(ctx)
+                        await prodMessage(ctx)
                     }else {
-                        ctx.reply("Извините, пока нет ни одного товара")
+                        await ctx.reply("Извините, пока нет ни одного товара")
                     }                            
                 }).catch( err => console.log(err))               
             }catch(e){}
@@ -104,6 +105,7 @@ module.exports.setCommands = (bot) => {
 
     bot.action('leftP', async ctx => {
         try{
+            if (await agreed(ctx)>=3)
             if (!listP){
                 const promise = queryProduct.getAll(ctx)
 
@@ -112,14 +114,14 @@ module.exports.setCommands = (bot) => {
                     if (listP.length !== 0){
                         indexP = parseInt((listP.length / 2), 10)
                         ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                        while (!prodMessage(ctx) && indexP - 1 >= 0){
+                        while (!await prodMessage(ctx) && indexP - 1 >= 0){
                             indexP -= 1
                         }
                     }})
             }else if (indexP > 0 && listP.length !== 0){
                 indexP -= 1
                 ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                while (!prodMessage(ctx) && indexP - 1 >= 0){
+                while (!await prodMessage(ctx) && indexP - 1 >= 0){
                     indexP -= 1
                 }
             }
@@ -128,6 +130,7 @@ module.exports.setCommands = (bot) => {
 
     bot.action('rightP', async ctx => {
         try{
+            if (await agreed(ctx)>=3)
             if (!listP){
                 const promise = queryProduct.getAll(ctx)
 
@@ -136,14 +139,14 @@ module.exports.setCommands = (bot) => {
                     if (listP.length !== 0){
                         indexP = parseInt((listP.length / 2), 10)
                         ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                        while (!prodMessage(ctx) && indexP + 1 < listP.length){
+                        while (!await prodMessage(ctx) && indexP + 1 < listP.length){
                             indexP += 1
                         }
                     }})
             }else if (indexP < listP.length - 1 && listP.length !== 0){
                 indexP += 1
                 ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                while (!prodMessage(ctx) && indexP + 1 < listP.length){
+                while (!await prodMessage(ctx) && indexP + 1 < listP.length){
                     indexP += 1
                 }
             }        
@@ -152,13 +155,14 @@ module.exports.setCommands = (bot) => {
     // Услуги
 
     bot.hears(/👩🏻‍🔧/, async ctx =>  {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
-        if (agreed(ctx)>=3){
-           loadSer(ctx)
+        if (await agreed(ctx)>=3){
+            loadSer(ctx)
         }}
     );
 
     bot.action('leftS', async ctx => {
         try{
+            if (await agreed(ctx)>=3)
             if (!listS){
                 const promise = queryService.getAll(ctx)
 
@@ -167,14 +171,14 @@ module.exports.setCommands = (bot) => {
                     if (listS.length !== 0){
                         indexS = parseInt((listS.length / 2), 10)
                         ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                        while (!serMessage(ctx) && indexS - 1 >= 0){
+                        while (! await serMessage(ctx) && indexS - 1 >= 0){
                             indexS -= 1
                         }
                     }})
             }else if (indexS > 0 && listS.length !== 0){
                 indexS -= 1
                 ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                while (!serMessage(ctx) && indexS - 1 >= 0){
+                while (! await serMessage(ctx) && indexS - 1 >= 0){
                     indexS -= 1
                 }
             }
@@ -183,6 +187,7 @@ module.exports.setCommands = (bot) => {
 
     bot.action('rightS', async ctx => {
         try{
+            if (await agreed(ctx)>=3)
             if (!listS){
                 const promise = queryService.getAll(ctx)
 
@@ -191,14 +196,14 @@ module.exports.setCommands = (bot) => {
                     if (listS.length !== 0){
                         indexS = parseInt((listS.length / 2), 10)
                         ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                        while (!serMessage(ctx) && indexS + 1 < listS.length){
+                        while (!await serMessage(ctx) && indexS + 1 < listS.length){
                             indexS += 1
                         }
                     }})
             }else if (indexS < listS.length - 1 && listS.length !== 0){
                 indexS += 1
                 ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                while (!serMessage(ctx) && indexS + 1 < listS.length){
+                while (! await serMessage(ctx) && indexS + 1 < listS.length){
                     indexS += 1
                 }
             }
@@ -208,57 +213,54 @@ module.exports.setCommands = (bot) => {
     
     bot.hears(/❓/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         {
-            if (agreed(ctx)>=3){
-                await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.list')}`, Extra.HTML().markup(Markup.inlineKeyboard(convertKeyboard(answers.values, ctx)))) 
+            if (await agreed(ctx)>=3){
+                answers = await queryAnswer.getAll(ctx)
+                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.list')}`, Extra.HTML().markup(Markup.inlineKeyboard(convertKeyboard(answers, ctx))))
             }
         }  
     );
 
     bot.action(/ques#/, async ctx => {
-
         try{
-            var id = ctx.callbackQuery.data.split("#")[1]
-            let element
-            answers.values.forEach(item => {
-                if (item.id == id){
-                    element = item
-                    return
+            if (await agreed(ctx)>=3)
+                if (!answers) answers = await queryAnswer.getAll(ctx)
+                var id = ctx.callbackQuery.data.split("#")[1]
+    
+                let element
+                answers.forEach(item => {
+                    if (item.id == id){
+                        element = item
+                        return
+                    }
+                })
+                if (element) {
+                    ctx.webhookReply = false
+                    await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.ques', {
+                        question: element.question[dict[ctx.i18n.locale()]],
+                        answer: element.answer[dict[ctx.i18n.locale()]]
+                    })}`)
+                    ctx.webhookReply = true
                 }
-            })
-            if (element){
-                ctx.webhookReply = false
-                await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.ques', {
-                    question: element.question[dict[ctx.i18n.locale()]],
-                    answer: element.answer[dict[ctx.i18n.locale()]]
-                })}`)
-                ctx.webhookReply = true
-            }
         }catch(e){}
     })
 
     ///////////////////////////////////////////////////////////////
 
     bot.help( async ctx => {
-        if (agreed(ctx)>=3)
+        if (await agreed(ctx)>=3)
             await ctx.replyWithHTML(`${ctx.i18n.t('help')}`)
     })
 
     bot.action(/ru|en/, async ctx => {
         try{
-            if (agreed(ctx) === 1) {
-                await ctx.scene.enter('start')
+            if (await agreed(ctx) <= 1) {
+                ctx.scene.enter('start')
             }
-            if (agreed(ctx)>=3){
+            if (await agreed(ctx)>=3){
                 const callbackQuery = ctx.callbackQuery.data
                 if (ctx.i18n.locale() !== callbackQuery){
+                    await queryUser.update(user)
                     ctx.i18n.locale(callbackQuery)
-                    users.forEach(user => {
-                        if ( ctx.chat.id === user.id){
-                            user.lang = callbackQuery
-                            return
-                        }
-                    });
-                    await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);
                     const message = ctx.i18n.t('change')
                     await ctx.replyWithHTML(message)
                     this.menuMessage(ctx)              
@@ -267,26 +269,30 @@ module.exports.setCommands = (bot) => {
     })
 
     bot.action('cont', async ctx => {
-        require("./helper").loadSer(ctx)
+        if (await agreed(ctx)>=3)
+            loadSer(ctx)
     })
 
     bot.command('admin', async ctx => {
+        
         try{
-            const user = users.filter(user => user.id === ctx.chat.id)[0]
-            if (user.adm) ctx.scene.enter('admin')
-            else{
-                let m = ctx.message.text.split(" ")
-                m = m.filter(item => item != "")
-                const password = m[1]
+            user = await queryUser.findOne({id: ctx.chat.id})
+            if (await agreed(ctx)>=3){
 
-                if (bcrypt.compareSync(password, process.env.ADMIN_PASSWORD)){
-                    user.adm = true
-                    await fs.writeFileSync("data/userlist.json", `${JSON.stringify(users)}`);
-                    ctx.scene.enter('admin')
-                }else
-                    await ctx.reply(`${ctx.i18n.t('admin')}`)
-        }
-        }catch(e){}
+                if (user.adm) ctx.scene.enter('admin')
+                else{
+                    let m = ctx.message.text.split(" ")
+                    m = m.filter(item => item != "")
+                    const password = m[1]
+
+                    if (bcrypt.compareSync(password, process.env.ADMIN_PASSWORD)){
+                        user.adm = true
+                        await queryUser.update(user)
+                        ctx.scene.enter('admin')
+                    }else
+                        await ctx.reply(`${ctx.i18n.t('admin')}`)
+                }
+            }}catch(e){}
       })
 
     // bot.action('заказатьP', async ctx => {           
@@ -314,42 +320,36 @@ module.exports.setCommands = (bot) => {
     // }) 
 
     bot.hears(/🙋/, async ctx =>{
-        if (agreed(ctx)>=3){                
-            require('./Fond').askFunction(ctx)
+        if (await agreed(ctx)>=3){                
+            await require('./Fond').askFunction(ctx)
             await ctx.scene.enter('🎩')
         }
     })
 
     bot.hears(/🔎/, async ctx => {           
-        if (agreed(ctx)>=3){
+        if (await agreed(ctx)>=3){
             await ctx.scene.enter('🌎')
         }
     }) 
 
     bot.hears(/🔙/, async ctx => {  
-        if (agreed(ctx)>=3) require("./helper").menuMessage(ctx)   
+        if (await agreed(ctx)>=3) await menuMessage(ctx)   
     }) 
 
     bot.hears(/📝/, async ctx => {
-        if (agreed(ctx)>=3) {
+        if (await agreed(ctx)>=3) {
             await ctx.scene.leave()
             require('../bot').test(ctx)
         }
     })
 
     bot.hears(/📚/, async ctx => {
-        if (agreed(ctx) >=3) require("./helper").menuMessage(ctx)  
+        if (await agreed(ctx) >=3) await menuMessage(ctx)  
     })
 
     bot.hears(/✅$/, async ctx => {
-        if (agreed(ctx)===2) {
+        if (await agreed(ctx)===2) {
             await ctx.scene.enter('start') 
-        }
-    })
-    bot.hears(/👨‍💼/, async ctx => {
-        if (agreed(ctx) >= 3){
-            loadSer(ctx)
-            menuMessage(ctx)
         }
     })
 }
@@ -383,20 +383,17 @@ const menuMessage = async (ctx) =>
         }catch(e){}
 }
 
-function agreed(ctx){
-    let step = 0
-    users.forEach(user => {
-        if (ctx.chat.id === user.id){
-            try{
-            if (ctx.i18n.locale()!==user.lang)
-                ctx.i18n.locale(user.lang)
-            step = user.step   
-            console.log(step)
-            }catch(e){}    
-        }
-    });
-    return step
+async function agreed(ctx){  
+
+    if (user && user.step >= 3) return 4
+    user = await queryUser.findOne({id: ctx.chat.id})
+    console.log("agreed : "+ user)
+    if (user){
+        ctx.i18n.locale(user.lang)
+        return user.step
+    }else return 0
 }
+
 module.exports.menuMessage = menuMessage
 
 async function prodMessage(ctx){
@@ -414,7 +411,6 @@ async function prodMessage(ctx){
         ctx.webhookReply = true
             return true
     }catch(e){
-        console.log(e)
         ctx.webhookReply = true
         return false       
     }
@@ -435,7 +431,6 @@ async function serMessage(ctx){
         ctx.webhookReply = true
             return true
     }catch(e){
-        console.log(e)
         ctx.webhookReply = true
         return false       
     }
@@ -453,7 +448,7 @@ function convertKeyboard(element, ctx){
     return keyboard
 }
 
-async function loadSer(ctx){
+function loadSer(ctx){
     try{
         if (messageS){
             ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
@@ -465,7 +460,7 @@ async function loadSer(ctx){
             listS = data
             if (listS.length !== 0){
                 indexS = parseInt((listS.length / 2), 10)
-                serMessage(ctx)
+                await serMessage(ctx)
             }else {
                 ctx.reply("Извините, пока нет ни одной услуги")
             }                           
@@ -508,3 +503,5 @@ async function availibleDates(ctx){
 }
 
 module.exports.loadSer = loadSer
+
+let timeout_answ
