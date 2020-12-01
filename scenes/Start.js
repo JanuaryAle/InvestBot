@@ -17,7 +17,7 @@ class SceneGenerator{
             switch(user.step){
                 case 2: {
                     if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") {
-                        await step1(ctx)
+                        step1(ctx)
                         return ctx.wizard.selectStep(2)
                     }else{
                         step2(ctx)
@@ -25,27 +25,27 @@ class SceneGenerator{
                     }
                 }
                 case 3: {
-                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") await step2(ctx)
+                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") step2(ctx)
                     return ctx.wizard.selectStep(3)
                 }
                 case 4: {
-                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") await step4(ctx)
+                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") step4(ctx)
                     break
                 }
                 case 1: {
                     if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") {
-                        await step0(ctx)
+                        step0(ctx)
                         return ctx.wizard.next()
                     }else if (ctx.callbackQuery){
                         const callbackQuery = ctx.callbackQuery.data
                         ctx.i18n.locale(callbackQuery);
                         user.lang = callbackQuery
-                        await step1(ctx)
+                        step1(ctx)
                         return ctx.wizard.selectStep(2)
                     }
                 } 
                 default: {
-                    await step0(ctx)
+                    step0(ctx)
                     return ctx.wizard.next()
                 }
             }}catch(e){console.log(e)}
@@ -62,7 +62,7 @@ class SceneGenerator{
                 ctx.i18n.locale(callbackQuery);
                 user.lang = callbackQuery
                 await queryUser.update(user)
-                await step1(ctx)
+                step1(ctx)
                 return ctx.wizard.next()
             }catch(e){console.log(e)}
         }, async ctx => {
@@ -74,7 +74,7 @@ class SceneGenerator{
                 }}catch(e){console.log(e)}
             try{
                 if (ctx.message.text == `${ctx.i18n.t('start.acception.button')}`){
-                    await step2(ctx)
+                    step2(ctx)
                     return ctx.wizard.next()
                 }
             }catch(e){console.log(e)}
@@ -87,9 +87,9 @@ class SceneGenerator{
                 }}catch(e){console.log(e)}
             try{
                 if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.ready')}`){ 
-                    await step3(ctx)
+                    step3(ctx)
                 }else if (ctx.message.text == `${ctx.i18n.t('start.great.buttons.know')}`){
-                    await step4(ctx)   
+                    step4(ctx)   
                 }
             }catch(e){console.log(e)}
         })
