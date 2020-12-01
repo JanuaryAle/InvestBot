@@ -127,19 +127,19 @@ async function step0(ctx){
 }
 async function step1(ctx){
 
-     ctx.replyWithHTML(ctx.i18n.t('change'))
-     ctx.replyWithHTML(ctx.i18n.t('start.hello', {
+    await ctx.replyWithHTML(ctx.i18n.t('change'))
+    await ctx.replyWithHTML(ctx.i18n.t('start.hello', {
         userId: ctx.from.id,
         userFirstName: ctx.from.first_name,
         name: file.fondInfo.name
     }))
-     ctx.replyWithHTML(`👇${ctx.i18n.t('start.acception.text')}`, Extra.HTML()
+    await ctx.replyWithHTML(`👇${ctx.i18n.t('start.acception.text')}`, Extra.HTML()
         .markup(Markup.keyboard([`${ctx.i18n.t('start.acception.button')}` ]).resize()))
     user.step = 2
     await queryUser.update(user)
 }
 async function step2(ctx){
-     ctx.replyWithHTML(`👇${ctx.i18n.t('start.great.text')}`,
+    await ctx.replyWithHTML(`👇${ctx.i18n.t('start.great.text')}`,
         Extra.HTML()
         .markup(Markup.keyboard(
         [
@@ -159,7 +159,7 @@ async function step4(ctx){
     user.step = 4
     await queryUser.update(user)
     
-    ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.about_us')}`,
+    await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.about_us')}`,
         Extra.HTML()
         .markup(Markup.inlineKeyboard(
         [
