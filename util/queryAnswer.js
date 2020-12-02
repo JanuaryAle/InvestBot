@@ -1,6 +1,4 @@
 const Answer = require('../models/Answer')
-const file = require('../data/info.json')
-const fs = require('fs')
 
 const dict = {
     "ru" : 0,
@@ -14,7 +12,7 @@ module.exports.getAll = async function(ctx) {
         items.forEach(element => {
             let newElement = {}
             newElement.answer = element.answer[dict[ctx.i18n.locale()]]
-            newElement.question = element.description[dict[ctx.i18n.locale()]]
+            newElement.question = element.question[dict[ctx.i18n.locale()]]
             newItems.push(newElement)
         });
         return newItems

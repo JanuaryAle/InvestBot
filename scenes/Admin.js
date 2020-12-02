@@ -2,19 +2,17 @@ const Markup = require('telegraf/markup')
 const Extra = require('telegraf/extra')
 const Scene = require('telegraf/scenes/base')
 
-const docsFileName = '../data/documents.json'
 const queryProduct = require('../util/queryProductLang');
 const queryService = require('../util/queryServiceLang');
 const queryAnswer = require('../util/queryAnswer')
-
-let docs = require(docsFileName)
+const queryDocs = require('../util/queryDocs')
 
 let message
-let block = false
 let stack = []
 let listP
 let listS
 let answers
+let docs
 
 const keyboard = 
     [
@@ -78,21 +76,21 @@ class SceneGenerator{
 
         item.enter(async ctx => {
             try{
-            loadServices(ctx)
-            loadProducts(ctx)
-            loadAnswers(ctx)
-            ctx.webhookReply = false
-            await ctx.replyWithHTML(`<b>Добро пожаловать в режим администратора!</b> Чтобы вернуться в меню, воспользуйтесь клавиатурой...`, 
-            Extra.HTML({parse_mode: 'HTML'})
-            .markup(Markup.keyboard(
-                [[`📚 Вернуться в меню`]]).resize()))
-            block = false
-            const scem = {text: `Что вы хотели бы отредактировать?`, keyboard: keyboard}
-            message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-            ctx.webhookReply = true
-            stack.push(scem)
-            updateTimeout(ctx)
-            }catch(e){}
+                loadServices(ctx)
+                loadProducts(ctx)
+                loadAnswers(ctx)
+                loadDocs(ctx)
+                ctx.webhookReply = false
+                await ctx.replyWithHTML(`<b>Добро пожаловать в режим администратора!</b> Чтобы вернуться в меню, воспользуйтесь клавиатурой...`, 
+                Extra.HTML({parse_mode: 'HTML'})
+                .markup(Markup.keyboard(
+                    [[`📚 Вернуться в меню`]]).resize()))
+                const scem = {text: `Что вы хотели бы отредактировать?`, keyboard: keyboard}
+                message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
+                ctx.webhookReply = true
+                stack.push(scem)
+                updateTimeout(ctx)
+                }catch(e){}
         })
 
         item.action(/🟢|🔵|📢|❔/, async ctx => {  // буквы - нет
@@ -113,6 +111,7 @@ class SceneGenerator{
             try{
                 if (ctx.update.callback_query.message.message_id === message.message_id){
                     try{
+                        console.log(message)
                         await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
                         stack.pop()
                         const scem = stack[stack.length - 1]
@@ -122,7 +121,7 @@ class SceneGenerator{
                         updateTimeout(ctx)
                     }catch(e){console.log(e)}
                 }
-            }catch(e){}
+            }catch(e){console.log(e)}
         })
 
         item.action('show', async ctx => {
@@ -177,12 +176,13 @@ class SceneGenerator{
             }catch(e){}
         })
 
-        item.action(/docs:/, async ctx => {
+        item.action(/docs#/, async ctx => {
             try{
                 if (ctx.update.callback_query.message.text.startsWith("Показать")){
                     const i = +ctx.callbackQuery.data.substr(5)
                     await ctx.telegram.sendDocument(ctx.chat.id, docs[i].file_id)} 
                 if (ctx.update.callback_query.message.text.startsWith("Удалить")){
+                    console.log("del")
                     deleteReport(ctx)
                 }                
             }catch(e){}})
@@ -205,16 +205,28 @@ class SceneGenerator{
                 if (message.text.startsWith("📢 Отчеты Можете отправлять")){
                     try{
                         console.log('message')
-                        const tmp = {
+                        const element = {
                             file_name : ctx.update.message.document.file_name,
                             file_id : ctx.update.message.document.file_id
                         }
-                        docs.push(tmp)
-                        await fs.writeFileSync("data/documents.json", `${JSON.stringify(docs)}`);
-                        await ctx.reply(`Файл ${tmp.file_name} получен`)
+
+                        const promise = await queryDocs.create(element)
+
+                        if (promise){
+                            ctx.webhookReply = false
+                            await ctx.replyWithHTML(`Элемент ${element.file_name} добавлен!`)
+                            //ctx.webhookReply = true
+                            docs.push(element)
+                        }else{
+                            ctx.webhookReply = false
+                            await ctx.replyWithHTML(`Элемент ${element.file_name} добавить не удалось...`)
+                            //ctx.webhookReply = true
+                        }        
+
                     }catch(e){}}
             }}catch(e){}
         })
+
         item.leave(async ctx => {
             await ctx.replyWithHTML('Выход из режима администратора...')
         })
@@ -386,7 +398,7 @@ async function addReport(ctx)
 {
     try{
         await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
-        const scem = {text: "📢 Отчеты Можете отправлять документы, убедитесь, что название файлов соответсвует шаблону: [Группа]-DD.MM.YY.[Расширение]\nНапример 'IPO-29.08.2020.xlsx'\n Названия групп: Акция, IPO, Советники", keyboard: [Markup.callbackButton('Закончить', 'back')]}
+        const scem = {text: "📢 Отчеты Можете отправлять документы, убедитесь, что название файлов соответсвует шаблону: [Группа]-DD.MM.YY.[Расширение]\n\nНапример 'IPO-29.08.2020.xlsx'\n\nНазвания групп: Акции, IPO, Советники", keyboard: [Markup.callbackButton('Закончить', 'back')]}
         //ctx.webhookReply = false
         message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
         //ctx.webhookReply = true
@@ -404,9 +416,9 @@ function listReports()
         for (let i = 0; i < docs.length; i+=2){
             let mini = []
             let j = i + 1
-            mini.push(Markup.callbackButton(`${docs[i].file_name}`, `docs:${i}`))
+            mini.push(Markup.callbackButton(`${docs[i].file_name}`, `docs#${i}`))
             while (j < docs.length && j < i + 2){
-                mini.push(Markup.callbackButton(`${docs[j].file_name}`, `docs:${j}`))
+                mini.push(Markup.callbackButton(`${docs[j].file_name}`, `docs#${j}`))
                 j++
             }
             keyboard[keyboard.length] = mini
@@ -418,12 +430,33 @@ function listReports()
 
 async function deleteReport(ctx){
     try{
-        const i = +ctx.callbackQuery.data.substr(5)
-        console.log(i)
-        docs = docs.filter((element, index) => index !== i);
-        await fs.writeFileSync("data/documents.json", `${JSON.stringify(docs)}`);
+        let element
         await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
-    }catch(e){}
+        const id = +ctx.callbackQuery.data.split("#")[1]
+        docs.forEach((item, index) => {
+            if (index == id){
+                element = item
+            }
+        })
+
+        const promise = await queryDocs.remove(element)
+
+        const scem = {text: "Элемент удален!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
+
+        if (promise){
+            //ctx.webhookReply = false
+            message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
+            //ctx.webhookReply = true
+            docs = docs.filter(item => item !== element)
+        }else{
+            scem.text = 'Что-то пошло не так'
+            //ctx.webhookReply = false
+            message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
+            //ctx.webhookReply = true
+        }        
+        stack.pop()
+        stack.push(scem)
+    }catch(e){console.log(e)}
 }
 
 // Товары и услуги
@@ -449,6 +482,14 @@ async function loadAnswers(ctx){
 
     promise.then(async (data) =>{
         answers = data
+    }).catch( err => console.log(err))                      
+}
+
+async function loadDocs(ctx){
+    const promise = queryDocs.getAll()
+
+    promise.then(async (data) =>{
+        docs = data
     }).catch( err => console.log(err))                      
 }
 
@@ -612,8 +653,8 @@ try{
     element.imageSrc = text.trim()
 
     try{
-        console.log(await ctx.replyWithPhoto(element.imageSrc, Extra.load({ parse_mode: "HTML",
-            caption: "Проверка фотографии пройдена"})))
+            await ctx.replyWithPhoto(element.imageSrc, Extra.load({ parse_mode: "HTML",
+            caption: "Проверка фотографии пройдена"}))
 
         const promise = list === listP ? await queryProduct.create(element) : await queryService.create(element)
         const scem = {text: "Элемент добавлен!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}

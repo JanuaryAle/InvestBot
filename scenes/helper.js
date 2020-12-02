@@ -1,17 +1,13 @@
 const Markup = require('telegraf/markup')
 const Extra = require('telegraf/extra')
 const bcrypt = require('bcryptjs')
-const { match } = require('telegraf-i18n')
 const queryProduct = require('../util/queryProductLang');
 const queryService = require('../util/queryServiceLang');
 const queryAnswer = require('../util/queryAnswer');
 const queryUser = require('../util/queryUser');
-const docsFileName = '../data/documents.json'
-const docs = require(docsFileName)
+const queryDocs = require('../util/queryDocs');
 
-const fs = require('fs');
-
-
+let docs
 let user
 
 let messageP
@@ -60,6 +56,8 @@ module.exports.setCommands = (bot) => {
         try{
             if (await agreed(ctx)>=3){
                 let flag = false
+                if (!docs) docs = await queryDocs.getAll()
+
                 docs.forEach(async item => {   
                     if( item.file_name.startsWith(ctx.update.callback_query.message.text) && item.file_name.split('-')[1].substr(3,7) === ctx.callbackQuery.data.substr(5)){
                         flag = true                    
@@ -224,20 +222,15 @@ module.exports.setCommands = (bot) => {
         try{
             if (await agreed(ctx)>=3)
                 if (!answers) answers = await queryAnswer.getAll(ctx)
-                var id = ctx.callbackQuery.data.split("#")[1]
+                var id = +ctx.callbackQuery.data.split("#")[1]
     
-                let element
-                answers.forEach(item => {
-                    if (item.id == id){
-                        element = item
-                        return
-                    }
-                })
+                let element = answers[id]
+
                 if (element) {
                     ctx.webhookReply = false
-                    await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.ques', {
-                        question: element.question[dict[ctx.i18n.locale()]],
-                        answer: element.answer[dict[ctx.i18n.locale()]]
+                    await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ques', {
+                        question: element.question,
+                        answer: element.answer
                     })}`)
                     ctx.webhookReply = true
                 }
@@ -440,10 +433,10 @@ const dict = {
     "en" : 1
 }
 
-function convertKeyboard(element, ctx){
+function convertKeyboard(element){
     var keyboard = []
     element.forEach((item, i) => {
-        keyboard.push([Markup.callbackButton(item.question[dict[ctx.i18n.locale()]], `ques#${item.id}`)])
+        keyboard.push([Markup.callbackButton(item.question, `ques#${i}`)])
     })
     return keyboard
 }
@@ -470,6 +463,9 @@ function loadSer(ctx){
 async function availibleDates(ctx){
 
     let set = new Set()
+
+    docs = await queryDocs.getAll()
+
     docs.forEach(async item => {
         if( item.file_name.startsWith(ctx.callbackQuery.data)){
             set.add(item.file_name.split('-')[1].substr(3,7))
