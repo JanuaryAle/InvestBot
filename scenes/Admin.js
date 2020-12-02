@@ -81,13 +81,13 @@ class SceneGenerator{
             loadServices(ctx)
             loadProducts(ctx)
             loadAnswers(ctx)
+            ctx.webhookReply = false
             await ctx.replyWithHTML(`<b>Добро пожаловать в режим администратора!</b> Чтобы вернуться в меню, воспользуйтесь клавиатурой...`, 
             Extra.HTML({parse_mode: 'HTML'})
             .markup(Markup.keyboard(
                 [[`📚 Вернуться в меню`]]).resize()))
             block = false
             const scem = {text: `Что вы хотели бы отредактировать?`, keyboard: keyboard}
-            ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
             ctx.webhookReply = true
             stack.push(scem)
