@@ -43,11 +43,8 @@ module.exports.remove = async function(element){
 }
 
 module.exports.create = async function(element){
-        element.id = file.index
         const item = new Product(element)
         
-        file.index = file.index + 1
-        fs.writeFileSync('data/info.json', `${JSON.stringify(file)}`)
         try{
             await item.save()
 

@@ -611,6 +611,7 @@ async function addPS(ctx, text){
 async function addPS2(ctx, list){
 try{
     const element = {}
+    element.id = list.length > 0 ? list[list.length-1] + 1 : 0
     element.name = []
     element.description = []
     element.price = []
