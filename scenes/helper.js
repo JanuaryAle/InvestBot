@@ -99,7 +99,7 @@ module.exports.setCommands = (bot) => {
                         await ctx.reply("Извините, пока нет ни одного товара")
                     }                            
                 }).catch( err => console.log(err))               
-            }catch(e){}
+            }catch(e){console.log(e)}
         }}
     );
 
