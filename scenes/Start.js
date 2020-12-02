@@ -12,43 +12,43 @@ class SceneGenerator{
         const item = new WizardScene('start', 
         async (ctx) => {
             try{
-            ctx.webhookReply = false
-            await selectStep(ctx)
-            console.log("selectStepExit: " + user)
-            switch(user.step){
-                case 2: {
-                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") {
-                        await step1(ctx)
-                        return ctx.wizard.selectStep(2)
-                    }else{
-                        await step2(ctx)
+                ctx.webhookReply = false
+                await selectStep(ctx)
+                console.log("selectStepExit: " + user)
+                switch(user.step){
+                    case 2: {
+                        if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") {
+                            await step1(ctx)
+                            return ctx.wizard.selectStep(2)
+                        }else{
+                            await step2(ctx)
+                            return ctx.wizard.selectStep(3)
+                        }
+                    }
+                    case 3: {
+                        if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") await step2(ctx)
                         return ctx.wizard.selectStep(3)
                     }
-                }
-                case 3: {
-                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") await step2(ctx)
-                    return ctx.wizard.selectStep(3)
-                }
-                case 4: {
-                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") await step4(ctx)
-                    break
-                }
-                case 1: {
-                    if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") {
+                    case 4: {
+                        if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") await step4(ctx)
+                        break
+                    }
+                    case 1: {
+                        if (typeof ctx.message !== "undefined" && ctx.message.text === "/start") {
+                            await step0(ctx)
+                            return ctx.wizard.next()
+                        }else if (ctx.callbackQuery){
+                            const callbackQuery = ctx.callbackQuery.data
+                            ctx.i18n.locale(callbackQuery);
+                            user.lang = callbackQuery
+                            await step1(ctx)
+                            return ctx.wizard.selectStep(2)
+                        }
+                    } 
+                    default: {
                         await step0(ctx)
                         return ctx.wizard.next()
-                    }else if (ctx.callbackQuery){
-                        const callbackQuery = ctx.callbackQuery.data
-                        ctx.i18n.locale(callbackQuery);
-                        user.lang = callbackQuery
-                        await step1(ctx)
-                        return ctx.wizard.selectStep(2)
                     }
-                } 
-                default: {
-                    await step0(ctx)
-                    return ctx.wizard.next()
-                }
             }}catch(e){console.log(e)}
             
         }, async ctx => {
@@ -102,6 +102,7 @@ module.exports = new SceneGenerator().getStartScene()
 
 async function selectStep(ctx){
     try{
+        ctx.webhookReply = false
         user = await queryUser.findOne({id: ctx.chat.id})
         console.log("selectStep: " + user)
         if (user){

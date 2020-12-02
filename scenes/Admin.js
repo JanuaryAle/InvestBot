@@ -101,9 +101,9 @@ class SceneGenerator{
                 const text = ctx.callbackQuery.data
                 await ctx.telegram.deleteMessage(message.chat.id, message.message_id) // в функц
                 const scem = { text: text, keyboard: dict[text]}
-                ctx.webhookReply = false
+                //ctx.webhookReply = false
                 message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-                ctx.webhookReply = true
+                //ctx.webhookReply = true
                 stack.push(scem)
                 updateTimeout(ctx)
             }}catch(e){console.log(e)}
@@ -116,9 +116,9 @@ class SceneGenerator{
                         await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
                         stack.pop()
                         const scem = stack[stack.length - 1]
-                        ctx.webhookReply = false
+                        //ctx.webhookReply = false
                         message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-                        ctx.webhookReply = true
+                        //ctx.webhookReply = true
                         updateTimeout(ctx)
                     }catch(e){console.log(e)}
                 }
@@ -239,9 +239,9 @@ async function list(ctx, spec){
         await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
         const scem = {text: spec + " "+ text}
         scem.keyboard = dictList[text](ctx)
-        ctx.webhookReply = false
+        //ctx.webhookReply = false
         message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-        ctx.webhookReply = true
+        //ctx.webhookReply = true
         updateTimeout(ctx)
         stack.push(scem)
     }
@@ -263,9 +263,9 @@ async function addFAQ(ctx)
 {
     await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
     const scem = {text: "❔ FAQ Добавление элемента, скопируйте шаблон внизу и замените * на соотвствующий текст", keyboard: [Markup.callbackButton('Отменить', 'back')]}
-    ctx.webhookReply = false
+    //ctx.webhookReply = false
     message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-    ctx.webhookReply = true
+    //ctx.webhookReply = true
     stack.push(scem)
     ctx.replyWithHTML(
 `🇷🇺 Вопрос:
@@ -316,15 +316,15 @@ async function deleteQuestion(ctx){
         const scem = {text: "Элемент удален!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
 
         if (promise){
-            ctx.webhookReply = false
+            //ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-            ctx.webhookReply = true
+            //ctx.webhookReply = true
             answers = answers.filter(item => item !== element)
         }else{
             scem.text = 'Что-то пошло не так'
-            ctx.webhookReply = false
+            //ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-            ctx.webhookReply = true
+            //ctx.webhookReply = true
         }        
         stack.pop()
         stack.push(scem)
@@ -363,15 +363,15 @@ async function addFaq2(ctx){
         const promise = await queryAnswer.create(element)
         const scem = {text: "Элемент добавлен!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
         if (promise){
-            ctx.webhookReply = false
+            //ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-            ctx.webhookReply = true
+            //ctx.webhookReply = true
             answers.push(element)
         }else{
             scem.text = 'Что-то пошло не так'
-            ctx.webhookReply = false
+            //ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-            ctx.webhookReply = true
+            //ctx.webhookReply = true
         }        
 
         stack.pop()
@@ -387,9 +387,9 @@ async function addReport(ctx)
     try{
         await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
         const scem = {text: "📢 Отчеты Можете отправлять документы, убедитесь, что название файлов соответсвует шаблону: [Группа]-DD.MM.YY.[Расширение]\nНапример 'IPO-29.08.2020.xlsx'\n Названия групп: Акция, IPO, Советники", keyboard: [Markup.callbackButton('Закончить', 'back')]}
-        ctx.webhookReply = false
+        //ctx.webhookReply = false
         message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-        ctx.webhookReply = true
+        //ctx.webhookReply = true
         stack.push(scem)
     }catch(e){}
 }
@@ -525,17 +525,17 @@ async function deletePS(ctx, list){
         const scem = {text: "Элемент удален!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
 
         if (promise){
-            ctx.webhookReply = false
+            //ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-            ctx.webhookReply = true
+            //ctx.webhookReply = true
             if (list === listP){
                 listP = listP.filter(item => item !== element)
             }else listS = listS.filter(item => item !== element) 
         }else{
             scem.text = 'Что-то пошло не так'
-            ctx.webhookReply = false
+            //ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-            ctx.webhookReply = true
+            //ctx.webhookReply = true
         }        
         stack.pop()
         stack.push(scem)
@@ -546,9 +546,9 @@ async function addPS(ctx, text){
     try{
     await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
     const scem = {text: text + " Добавление элемента, скопируйте шаблон внизу и замените * на соотвствующий текст, максимальный размер названия - 100 символов, описания - 800, стоимости - 100", keyboard: [Markup.callbackButton('Отменить', 'back')]}
-    ctx.webhookReply = false
+    //ctx.webhookReply = false
     message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-    ctx.webhookReply = true
+    //ctx.webhookReply = true
     stack.push(scem)
     ctx.replyWithHTML(
 `🇷🇺 Название:
@@ -619,15 +619,15 @@ try{
         const scem = {text: "Элемент добавлен!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
 
         if (promise){
-            ctx.webhookReply = false
+            //ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-            ctx.webhookReply = true
+            //ctx.webhookReply = true
             list === listP ? listP.push(element) : listS.push(element)
         }else{
             scem.text = 'Что-то пошло не так'
-            ctx.webhookReply = false
+            //ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-            ctx.webhookReply = true
+            //ctx.webhookReply = true
         }        
         stack.pop()
         stack.push(scem)
