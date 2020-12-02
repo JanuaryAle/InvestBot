@@ -11,6 +11,7 @@ const docs = require(docsFileName)
 
 const fs = require('fs');
 
+
 let user
 
 let messageP
@@ -233,12 +234,12 @@ module.exports.setCommands = (bot) => {
                     }
                 })
                 if (element) {
-                    //ctx.webhookReply = false
+                    ctx.webhookReply = false
                     await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.ques', {
                         question: element.question[dict[ctx.i18n.locale()]],
                         answer: element.answer[dict[ctx.i18n.locale()]]
                     })}`)
-                    //ctx.webhookReply = true
+                    ctx.webhookReply = true
                 }
         }catch(e){}
     })
@@ -384,11 +385,9 @@ const menuMessage = async (ctx) =>
 
 async function agreed(ctx){  
 
-    if (user && user.step >= 3) {
-        return 4
-    }
+    if (user && user.step >= 3) return 4
     user = await queryUser.findOne({id: ctx.chat.id})
-    ctx.webhookReply = false
+    console.log("agreed : "+ user)
     if (user){
         ctx.i18n.locale(user.lang)
         return user.step
@@ -399,7 +398,7 @@ module.exports.menuMessage = menuMessage
 
 async function prodMessage(ctx){
     try{
-        //ctx.webhookReply = false
+        ctx.webhookReply = false
         const mes = await ctx.replyWithPhoto(listP[indexP].imageSrc,
             Extra.load({
                 caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[indexP].name, price: listP[indexP].price, description: listP[indexP].description})}\n(${indexP + 1}\\${listP.length})` ,
@@ -409,17 +408,17 @@ async function prodMessage(ctx){
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.order')}`, 'заказатьP')]
             ])))
         messageP = mes
-        //ctx.webhookReply = true
+        ctx.webhookReply = true
             return true
     }catch(e){
-        //ctx.webhookReply = true
+        ctx.webhookReply = true
         return false       
     }
 }
 
 async function serMessage(ctx){
     try{
-        //ctx.webhookReply = false
+        ctx.webhookReply = false
         const mes = await ctx.replyWithPhoto(listS[indexS].imageSrc,
             Extra.load({
                 caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[indexS].name, price: listS[indexS].price, description: listS[indexS].description})}\n(${indexS + 1}\\${listS.length})` ,
@@ -429,10 +428,10 @@ async function serMessage(ctx){
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.order')}`, 'заказатьS')]
             ])))
         messageS = mes
-        //ctx.webhookReply = true
+        ctx.webhookReply = true
             return true
     }catch(e){
-        //ctx.webhookReply = true
+        ctx.webhookReply = true
         return false       
     }
 }
