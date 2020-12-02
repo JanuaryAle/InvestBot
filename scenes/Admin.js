@@ -653,8 +653,8 @@ try{
     element.imageSrc = text.trim()
 
     try{
-            await ctx.replyWithPhoto(element.imageSrc, Extra.load({ parse_mode: "HTML",
-            caption: "Проверка фотографии пройдена"}))
+        console.log(await ctx.replyWithPhoto(element.imageSrc, Extra.load({ parse_mode: "HTML",
+            caption: "Проверка фотографии пройдена"})))
 
         const promise = list === listP ? await queryProduct.create(element) : await queryService.create(element)
         const scem = {text: "Элемент добавлен!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
