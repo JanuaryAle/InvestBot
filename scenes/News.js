@@ -3,7 +3,6 @@ const Markup = require('telegraf/markup')
 const Extra = require('telegraf/extra')
 const GetNewsList = require('../util/parser')
 const { match } = require('telegraf-i18n')
-const { catch } = require('telegraf/scenes/base')
 
 var index
 var list
