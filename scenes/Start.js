@@ -127,7 +127,7 @@ async function step0(ctx){
     await queryUser.update(user)
 }
 async function step1(ctx){
-
+    ctx.webhookReply = false
     await ctx.replyWithHTML(ctx.i18n.t('change'))
     await ctx.replyWithHTML(ctx.i18n.t('start.hello', {
         userId: ctx.from.id,
