@@ -87,7 +87,7 @@ class SceneGenerator{
                     [[`📚 Вернуться в меню`]]).resize()))
                 const scem = {text: `Что вы хотели бы отредактировать?`, keyboard: keyboard}
                 message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
-                ctx.webhookReply = true
+                //ctx.webhookReply = true
                 stack.push(scem)
                 updateTimeout(ctx)
                 }catch(e){}
@@ -611,7 +611,7 @@ async function addPS(ctx, text){
 async function addPS2(ctx, list){
 try{
     const element = {}
-    element.id = list.length > 0 ? list[list.length-1] + 1 : 0
+    element.id = list.length > 0 ? list[list.length-1] + 1 : 0 ///Что то тут не так сбд
     element.name = []
     element.description = []
     element.price = []

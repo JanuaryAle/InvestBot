@@ -57,7 +57,7 @@ module.exports.create = async function(element){
 module.exports.update = async function(element){
     try{
         const item = await Product.findOneAndUpdate(
-            {_id: element._id},
+            {id: element.id},
             {$set: element},
             {new: true}
         )
