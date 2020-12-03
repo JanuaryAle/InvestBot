@@ -255,6 +255,7 @@ module.exports.setCommands = (bot) => {
                     await queryUser.update(user)
                     ctx.i18n.locale(callbackQuery)
                     const message = ctx.i18n.t('change')
+                    ctx.webhookReply = false
                     await ctx.replyWithHTML(message)
                     this.menuMessage(ctx)              
             }}

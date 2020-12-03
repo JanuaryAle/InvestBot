@@ -6,9 +6,6 @@ let pollMessage
 let timeout
 const queryUser = require('./util/queryUser');
 
-const docsFileName = './data/documents.json'
-const docs = require(docsFileName)
-
 const {
     Markup,
     Extra,
