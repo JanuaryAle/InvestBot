@@ -39,7 +39,7 @@ class FondSceneGenerator{
                         [[`${ctx.i18n.t('scenes.fond.buttons.ask')}`],
                         [`${ctx.i18n.t('scenes.menu.buttons.ser')}`], 
                         [`${ctx.i18n.t('retry')}`]]).resize()))
-            }catch(e){}
+            }catch(e){console.log(e)}
             clearTimeout(timeout)
             asking = false
         })
@@ -74,7 +74,7 @@ class FondSceneGenerator{
         item.leave(async ctx => {
             try{
                 ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id)
-            }catch(e){}
+            }catch(e){console.log(e)}
             clearTimeout(timeout)
             asking = false
             restart = false
@@ -95,21 +95,21 @@ async function startPoint(ctx){
                 [[`${ctx.i18n.t('scenes.fond.buttons.ask')}`], 
                 [`${ctx.i18n.t('scenes.menu.buttons.ser')}`], 
                 [`${ctx.i18n.t('retry')}`]]).resize()))  
-    ctx.webhookReply = true    
+    //ctx.webhookReply = true    
     }catch(e){}}
 
 async function askFunction(ctx){
     try{
         if (!startMessage) restart = true
         asking = true
-        ctx.webhookReply = false
+        //ctx.webhookReply = false
         askMessage = await ctx.reply(`👇${ctx.i18n.t('scenes.fond.ask.text')}`,  Extra.HTML({parse_mode: 'HTML'}).markup(Markup.keyboard(
             [[`${ctx.i18n.t('abort.button')}`], 
             [`${ctx.i18n.t('retry')}`]]).resize()))
-        ctx.webhookReply = true
+        //ctx.webhookReply = true
     
         timeout = setTimeout(async () => {      
-            ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id)               
+            console.log(ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id))             
             await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.ask.end')}`, 
             Extra.HTML({parse_mode: 'HTML'})
             .markup(Markup.keyboard(

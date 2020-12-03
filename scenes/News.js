@@ -3,6 +3,7 @@ const Markup = require('telegraf/markup')
 const Extra = require('telegraf/extra')
 const GetNewsList = require('../util/parser')
 const { match } = require('telegraf-i18n')
+const { catch } = require('telegraf/scenes/base')
 
 var index
 var list
@@ -55,21 +56,22 @@ async function show(ctx){
 }
 
 async function printPortion(k, ctx){
-    while (k > 0 && index < list.length && flag) 
-    {
-        const element = list[index]
-        const readMore = `${ctx.i18n.t('scenes.news.source', {href: element.href})}`
-        await ctx.replyWithHTML(readMore)
-        k--
-        index += 1
-    }
-    if (index >= list.length - 2){
-        const promise = GetNewsList(page++)
-        promise.then((data) => {
-            if (flag){
-                list = list.concat(data);
-                if (k > 0) printPortion(k, ctx)
-            }
-        })
-    }
+    try{
+        while (k > 0 && index < list.length && flag) 
+        {
+            const element = list[index]
+            const readMore = `${ctx.i18n.t('scenes.news.source', {href: element.href})}`
+            await ctx.replyWithHTML(readMore)
+            k--
+            index += 1
+        }
+        if (index >= list.length - 2){
+            const promise = GetNewsList(page++)
+            promise.then((data) => {
+                if (flag){
+                    list = list.concat(data);
+                    if (k > 0) printPortion(k, ctx)
+                }
+            })
+    }}catch(e){console.log(e)}
 } 

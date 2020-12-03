@@ -123,7 +123,7 @@ module.exports.setCommands = (bot) => {
                     indexP -= 1
                 }
             }
-        }catch(e){}
+        }catch(e){console.log(e)}
     })
 
     bot.action('rightP', async ctx => {
@@ -180,7 +180,7 @@ module.exports.setCommands = (bot) => {
                     indexS -= 1
                 }
             }
-        }catch(e){}
+        }catch(e){console.log(e)}
     })
 
     bot.action('rightS', async ctx => {
@@ -205,7 +205,7 @@ module.exports.setCommands = (bot) => {
                     indexS += 1
                 }
             }
-        }catch(e){}})
+        }catch(e){console.log(e)}})
 
     // Вопросы
     
@@ -227,14 +227,14 @@ module.exports.setCommands = (bot) => {
                 let element = answers[id]
 
                 if (element) {
-                    ctx.webhookReply = false
+                    //ctx.webhookReply = false
                     await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ques', {
                         question: element.question,
                         answer: element.answer
                     })}`)
-                    ctx.webhookReply = true
+                    //ctx.webhookReply = true
                 }
-        }catch(e){}
+        }catch(e){console.log(e)}
     })
 
     ///////////////////////////////////////////////////////////////
@@ -285,7 +285,7 @@ module.exports.setCommands = (bot) => {
                     }else
                         await ctx.reply(`${ctx.i18n.t('admin')}`)
                 }
-            }}catch(e){}
+            }}catch(e){console.log(e)}
       })
 
     // bot.action('заказатьP', async ctx => {           
@@ -373,25 +373,26 @@ const menuMessage = async (ctx) =>
                 `${ctx.i18n.t('scenes.menu.buttons.about_us')}`],
                 [`${ctx.i18n.t('lang')}`]
             ]).resize()))
-        }catch(e){}
+        }catch(e){console.log(e)}
 }
 
 async function agreed(ctx){  
+    try{
+        if (user && user.step >= 3) return 4
+        user = await queryUser.findOne({id: ctx.chat.id})
 
-    if (user && user.step >= 3) return 4
-    user = await queryUser.findOne({id: ctx.chat.id})
-    console.log("agreed : "+ user)
-    if (user){
-        ctx.i18n.locale(user.lang)
-        return user.step
-    }else return 0
+        if (user){
+            ctx.i18n.locale(user.lang)
+            return user.step
+        }else return 0
+    }catch(e){}
 }
 
 module.exports.menuMessage = menuMessage
 
 async function prodMessage(ctx){
     try{
-        ctx.webhookReply = false
+        //ctx.webhookReply = false
         const mes = await ctx.replyWithPhoto(listP[indexP].imageSrc,
             Extra.load({
                 caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[indexP].name, price: listP[indexP].price, description: listP[indexP].description})}\n(${indexP + 1}\\${listP.length})` ,
@@ -401,17 +402,18 @@ async function prodMessage(ctx){
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.order')}`, 'заказатьP')]
             ])))
         messageP = mes
-        ctx.webhookReply = true
+        //ctx.webhookReply = true
             return true
     }catch(e){
-        ctx.webhookReply = true
+        console.log(e)
+        //ctx.webhookReply = true
         return false       
     }
 }
 
 async function serMessage(ctx){
     try{
-        ctx.webhookReply = false
+        //ctx.webhookReply = false
         const mes = await ctx.replyWithPhoto(listS[indexS].imageSrc,
             Extra.load({
                 caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[indexS].name, price: listS[indexS].price, description: listS[indexS].description})}\n(${indexS + 1}\\${listS.length})` ,
@@ -421,10 +423,11 @@ async function serMessage(ctx){
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.order')}`, 'заказатьS')]
             ])))
         messageS = mes
-        ctx.webhookReply = true
+        //ctx.webhookReply = true
             return true
     }catch(e){
-        ctx.webhookReply = true
+        console.log(e)
+        //ctx.webhookReply = true
         return false       
     }
 }
@@ -461,41 +464,42 @@ function loadSer(ctx){
     }catch(e){console.log(e)}
 }
 async function availibleDates(ctx){
+    try{
+        let set = new Set()
 
-    let set = new Set()
+        docs = await queryDocs.getAll()
 
-    docs = await queryDocs.getAll()
+        docs.forEach(async item => {
+            if( item.file_name.startsWith(ctx.callbackQuery.data)){
+                set.add(item.file_name.split('-')[1].substr(3,7))
+            }
+        })
 
-    docs.forEach(async item => {
-        if( item.file_name.startsWith(ctx.callbackQuery.data)){
-            set.add(item.file_name.split('-')[1].substr(3,7))
+        let array = []
+        set.forEach(item=> {
+            array.push(item)
+        })
+
+        let keyboard = []
+
+        for (let i = 0; i < array.length; i+=3){
+            let mini = []
+            let j = i + 1
+            mini.push(Markup.callbackButton(`${array[i]}`, `data:${array[i]}`))
+            while (j < array.length && j < i + 3){
+                mini.push(Markup.callbackButton(`${array[j]}`, `data:${array[j]}`))
+                j++
+            } 
+            keyboard[keyboard.length] = mini
         }
-    })
 
-    let array = []
-    set.forEach(item=> {
-        array.push(item)
-    })
-
-    let keyboard = []
-
-    for (let i = 0; i < array.length; i+=3){
-        let mini = []
-        let j = i + 1
-        mini.push(Markup.callbackButton(`${array[i]}`, `data:${array[i]}`))
-        while (j < array.length && j < i + 3){
-            mini.push(Markup.callbackButton(`${array[j]}`, `data:${array[j]}`))
-            j++
-        } 
-        keyboard[keyboard.length] = mini
-    }
-
-    if (set.size === 0)
-    {
-        await ctx.replyWithHTML('Пока записей нет')
-    }else{
-        await ctx.reply(`${ctx.callbackQuery.data}`, Extra.HTML().markup(Markup.inlineKeyboard(keyboard)))
-    }
+        if (set.size === 0)
+        {
+            await ctx.replyWithHTML('Пока записей нет')
+        }else{
+            await ctx.reply(`${ctx.callbackQuery.data}`, Extra.HTML().markup(Markup.inlineKeyboard(keyboard)))
+        }
+    }catch(e){console.log(e)}
 }
 
 module.exports.loadSer = loadSer
