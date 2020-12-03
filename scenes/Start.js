@@ -159,7 +159,7 @@ async function step3(ctx){
 async function step4(ctx){
     user.step = 4
     await queryUser.update(user)
-    
+    ctx.webhookReply = false
     await ctx.replyWithHTML(`👇${ctx.i18n.t('scenes.fond.about_us')}`,
         Extra.HTML()
         .markup(Markup.inlineKeyboard(
