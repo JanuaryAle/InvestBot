@@ -102,7 +102,7 @@ async function askFunction(ctx){
     try{
         if (!startMessage) restart = true
         asking = true
-        //ctx.webhookReply = false
+        ctx.webhookReply = false
         askMessage = await ctx.reply(`👇${ctx.i18n.t('scenes.fond.ask.text')}`,  Extra.HTML({parse_mode: 'HTML'}).markup(Markup.keyboard(
             [[`${ctx.i18n.t('abort.button')}`], 
             [`${ctx.i18n.t('retry')}`]]).resize()))

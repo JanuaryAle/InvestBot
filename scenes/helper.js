@@ -393,7 +393,7 @@ module.exports.menuMessage = menuMessage
 
 async function prodMessage(ctx){
     try{
-        //ctx.webhookReply = false
+        ctx.webhookReply = false
         const mes = await ctx.replyWithPhoto(listP[indexP].imageSrc,
             Extra.load({
                 caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[indexP].name, price: listP[indexP].price, description: listP[indexP].description})}\n(${indexP + 1}\\${listP.length})` ,
@@ -414,7 +414,7 @@ async function prodMessage(ctx){
 
 async function serMessage(ctx){
     try{
-        //ctx.webhookReply = false
+        ctx.webhookReply = false
         const mes = await ctx.replyWithPhoto(listS[indexS].imageSrc,
             Extra.load({
                 caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[indexS].name, price: listS[indexS].price, description: listS[indexS].description})}\n(${indexS + 1}\\${listS.length})` ,
