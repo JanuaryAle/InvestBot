@@ -139,6 +139,15 @@ scenes:
       prod:
         left: Previous
         right: Next
+    order:
+      text: |
+        Please confirm your order:
+
+        Name: ${name}
+        Cost: ${price}
+      buttons:
+        ok: Confirm
+        back: Go back to the list
   vic:
     text: |
       <b>You have selected the training section</b>

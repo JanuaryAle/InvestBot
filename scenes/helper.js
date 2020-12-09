@@ -7,6 +7,8 @@ const queryAnswer = require('../util/queryAnswer');
 const queryUser = require('../util/queryUser');
 const queryDocs = require('../util/queryDocs');
 
+const CHAT_ID = process.env.CALLBACK_CHAT
+
 let docs
 let user
 
@@ -81,23 +83,7 @@ module.exports.setCommands = (bot) => {
     
     bot.hears(/👨🏻‍💻/, async ctx =>  {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         if (await agreed(ctx)>=3){
-            try{
-                if (messageP){
-                    ctx.telegram.deleteMessage(messageP.chat.id, messageP.message_id)
-                }
-
-                const promise = queryProduct.getAll(ctx)
-
-                promise.then(async (data) =>{
-                    listP = data
-                    if (listP.length !== 0){
-                        indexP = parseInt((listP.length / 2), 10)
-                        await prodMessage(ctx)
-                    }else {
-                        await ctx.reply("Извините, пока нет ни одного товара")
-                    }                            
-                }).catch( err => console.log(err))               
-            }catch(e){console.log(e)}
+           loadProd(ctx)
         }}
     );
 
@@ -267,8 +253,14 @@ module.exports.setCommands = (bot) => {
             loadSer(ctx)
     })
 
-    bot.command('admin', async ctx => {
-        
+    bot.action('test', async ctx => {
+        if (await agreed(ctx)>=3) {
+            await ctx.scene.leave()
+            require('../bot').test(ctx)
+        }
+    })
+
+    bot.command('admin', async ctx => {        
         try{
             user = await queryUser.findOne({id: ctx.chat.id})
             if (await agreed(ctx)>=3){
@@ -289,29 +281,47 @@ module.exports.setCommands = (bot) => {
             }}catch(e){console.log(e)}
       })
 
-    // bot.action('заказатьP', async ctx => {           
-    //     try{
-    //         const question = {
-    //             type: 
-    //             message: ctx.update.message.text,
-    //             userId: ctx.update.message.from.id,
-    //             userFirstName: ctx.update.message.from.first_name
-    //         }
-    //         await ctx.telegram.sendMessage(CHAT_ID,
-    //             `<b>Вам только что поступил вопрос от пользователя</b>\n<a href="tg://user?id=${question.userId}">${question.userFirstName}</a>: \n${ctx.update.message.text}`,
-    //             Extra.HTML())
-    //         await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ask.order')}`, 
-    //             Extra.HTML().markup(Markup.keyboard(
-    //                 [[`${ctx.i18n.t('scenes.fond.buttons.ask')}`], 
-    //                 [`${ctx.i18n.t('scenes.menu.buttons.ser')}`], 
-    //                 [`${ctx.i18n.t('retry')}`]]).resize()))
-    //         asking = false
-    //         clearTimeout(timeout)
-    //     }catch(e){}
-    // }) 
-    // bot.action('заказатьS', async ctx => {           
+    bot.action('заказатьP', async ctx => {           
+        try{
+            ctx.webhookReply = false
+            await ctx.telegram.deleteMessage(messageP.chat.id, messageP.message_id)
+            messageP = await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listP[indexP].name, price: listP[indexP].price})}` ,
+                Extra.HTML({                
+                }).markup(Markup.inlineKeyboard([
+                    Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.back')}`, 'backS'),
+                    Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.ok')}`, 'ok')
+                ])))
+        }catch(e){}
+    }) 
 
-    // }) 
+    bot.action('backP', async ctx => {           
+        loadProd(ctx)
+    }) 
+
+    bot.action('ok', async ctx => {
+        const i = ctx.update.callback_query.message.text.indexOf('\n')
+        await ctx.telegram.sendMessage(CHAT_ID,
+            `<b>Заказ от пользователя </b><a href="tg://user?id=${ctx.update.callback_query.message.chat.id}">${ctx.update.callback_query.message.chat.first_name}</a>:${ctx.update.callback_query.message.text.substr(i)}`,
+            Extra.HTML())
+        loadProd(ctx)
+    })
+
+    bot.action('заказатьS', async ctx => {           
+        try{
+            await ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
+            ctx.webhookReply = false
+            messageS = await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listS[indexS].name, price: listS[indexS].price})}` ,
+                Extra.HTML({                
+                }).markup(Markup.inlineKeyboard([
+                    Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.back')}`, 'backS'),
+                    Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.ok')}`, 'ok')
+                ])))
+        }catch(e){}
+    }) 
+
+    bot.action('backS', async ctx => {           
+        loadSer(ctx)
+    }) 
 
     bot.hears(/🙋/, async ctx =>{
         if (await agreed(ctx)>=3){                
@@ -445,10 +455,10 @@ function convertKeyboard(element){
     return keyboard
 }
 
-function loadSer(ctx){
+async function loadSer(ctx, userI){
     try{
         if (messageS){
-            ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
+            await ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
         }
         
         const promise = queryService.getAll(ctx)
@@ -456,7 +466,7 @@ function loadSer(ctx){
         promise.then(async (data) =>{
             listS = data
             if (listS.length !== 0){
-                indexS = parseInt((listS.length / 2), 10)
+                indexS = userI ? userI : parseInt((listS.length / 2), 10)
                 await serMessage(ctx)
             }else {
                 ctx.reply("Извините, пока нет ни одной услуги")
@@ -464,6 +474,27 @@ function loadSer(ctx){
         }).catch( err => console.log(err))               
     }catch(e){console.log(e)}
 }
+
+async function loadProd(ctx, userI){
+    try{
+        if (messageP){
+            await ctx.telegram.deleteMessage(messageP.chat.id, messageP.message_id)
+        }
+
+        const promise = queryProduct.getAll(ctx)
+
+        promise.then(async (data) =>{
+            listP = data
+            if (listP.length !== 0){
+                indexP = userI ? userI : parseInt((listP.length / 2), 10)
+                await prodMessage(ctx)
+            }else {
+                await ctx.reply("Извините, пока нет ни одного товара")
+            }                            
+        }).catch( err => console.log(err))               
+    }catch(e){console.log(e)}
+}
+
 async function availibleDates(ctx){
     try{
         let set = new Set()

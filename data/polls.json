@@ -23,5 +23,11 @@
         "asessment" : [[0,0,1,1], [1,0,1,1], [1,1,1,1], [1,1,1,1]],
         "multiple_answers" : false,
         "orientation" : false
+    },{
+        "question" : "Как вы сами считаете, какая услуга вам больше подходит?",
+        "answers" : ["Канал", "IPO", "Робот"],
+        "asessment" : [],
+        "multiple_answers" : false,
+        "orientation" : false
     }
 ]

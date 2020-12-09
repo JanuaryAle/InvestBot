@@ -72,13 +72,14 @@ class FondSceneGenerator{
         })
         
         item.leave(async ctx => {
+            if (askMessage){
             try{
                 ctx.telegram.deleteMessage(askMessage.chat.id, askMessage.message_id)
             }catch(e){console.log(e)}
             clearTimeout(timeout)
             asking = false
             restart = false
-        })
+        }})
 
         return item
     }

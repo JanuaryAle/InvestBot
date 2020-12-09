@@ -164,7 +164,8 @@ async function step4(ctx){
         Extra.HTML()
         .markup(Markup.inlineKeyboard(
         [
-            Markup.callbackButton(`${ctx.i18n.t('start.great.buttons.continue')}`, 'cont')         
+            Markup.callbackButton(`${ctx.i18n.t('start.great.buttons.continue')}`, 'cont'),
+            Markup.callbackButton(`${ctx.i18n.t('start.great.buttons.ready')}`, 'test')          
         ])))
     require("./helper").menuMessage(ctx)
 }
