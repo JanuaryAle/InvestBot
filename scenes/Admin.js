@@ -670,8 +670,8 @@ async function redPS1(ctx, list) {
             element.id = elementPS.id
             try{
                 ctx.webhookReply = false
-                console.log(await ctx.replyWithPhoto(element.imageSrc, Extra.load({ parse_mode: "HTML",
-                    caption: "Проверка фотографии пройдена"})))
+                await ctx.replyWithPhoto(element.imageSrc, Extra.load({ parse_mode: "HTML",
+                    caption: "Проверка фотографии пройдена"}))
                 await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
                 const promise = list === listP ? await queryProduct.update(element) : await queryService.update(element)
                 const scem = {text: "Элемент обновлен!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
@@ -710,8 +710,8 @@ async function addPS2(ctx, list) {
     if (element) {
         try{
             ctx.webhookReply = false
-            console.log(await ctx.replyWithPhoto(element.imageSrc, Extra.load({ parse_mode: "HTML",
-                caption: "Проверка фотографии пройдена"})))
+            await ctx.replyWithPhoto(element.imageSrc, Extra.load({ parse_mode: "HTML",
+                caption: "Проверка фотографии пройдена"}))
             await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
             const promise = list === listP ? await queryProduct.create(element) : await queryService.create(element)
             const scem = {text: "Элемент добавлен!", keyboard: [Markup.callbackButton('Продолжить', 'back')]}
