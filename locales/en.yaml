@@ -105,7 +105,6 @@ scenes:
       ok: Your request was successfully sent!
       err: Please send us a text message and we will contact you to talk in detail.
       end: The question timeout has expired, if you still want to ask a question, click again on "Ask us".
-      order: Would you like to order this product?
       alright: Our Manager will write to you in the near future about the order, thank you for taking an interest.
   news:
     text: |

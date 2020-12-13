@@ -21,7 +21,7 @@ module.exports.create = async function(ctx){
         const item = new User({
             id: ctx.chat.id,
             lang: "ru",
-            step: 0
+            step: 1
         })
 
         try{

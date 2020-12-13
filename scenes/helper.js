@@ -28,19 +28,24 @@ module.exports.setCommands = (bot) => {
         ctx.scene.enter('start')
     })
 
-    bot.hears(/🌎|🎩/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
-        {
-            try{
-                if (await agreed(ctx)>=3){
-                    const text = ctx.message.text
-                    const scene = text.charAt(0)+text.charAt(1)
-                    ctx.scene.enter(scene)
-                }}catch(e){}
-        }  
-    );
+    bot.hears(/🌎/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
+    {
+        try{
+            if (await agreed(ctx)>=3){
+                ctx.scene.enter('🌎')
+        }}catch(e){}
+    })
+
+    bot.hears(/🎩/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
+    {
+        try{
+            if (await agreed(ctx)>=3){
+                ctx.scene.enter("🎩")
+        }}catch(e){}
+    })
 
     bot.hears(/🇺🇸|🇷🇺/, async ctx => {
-        if (await agreed(ctx)>=3){
+        if (await agreed(ctx) >= 3){
             await langChange(ctx)
         }
     })
@@ -50,7 +55,7 @@ module.exports.setCommands = (bot) => {
     bot.action(/Акции|IPO|Советники/, async ctx => {
         try{
             if (await agreed(ctx)>=3)
-            await availibleDates(ctx)
+                await availibleDates(ctx)
         }catch(e){console.log(e)}
     })
 
@@ -68,7 +73,7 @@ module.exports.setCommands = (bot) => {
                 })
                 if (!flag) await ctx.reply("Записей не найдено") 
         }}catch(e){console.log(e)}      
-     })
+    })
 
     bot.hears(/📈/, async ctx => {
         if (await agreed(ctx)>=3)
@@ -81,137 +86,197 @@ module.exports.setCommands = (bot) => {
 
     // Товары
     
-    bot.hears(/👨🏻‍💻/, async ctx =>  {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
-        if (await agreed(ctx)>=3){
-           loadProd(ctx)
+    bot.hears(/👨🏻‍💻/, async ctx => {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
+        if (await agreed(ctx)>=3) {
+            await loadProd(ctx)
+            if (listP.length !== 0) {
+                await prodMessage(ctx, 0)
+            }else {
+                ctx.reply("Извините, пока нет ни одной услуги")
+            }
         }}
     );
 
     bot.action('leftP', async ctx => {
         try{
-            if (await agreed(ctx)>=3)
-            { 
-                ctx.webhookReply = false
-                if (!listP){
-                    const promise = queryProduct.getAll(ctx)
-
-                    promise.then(async (data) =>{
-                        listP = data
-                        if (listP.length !== 0){
-                            indexP = parseInt((listP.length / 2), 10)
-                            const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                            while (!await prodMessage(ctx) && indexP - 1 >= 0){
-                                indexP -= 1
-                            }
-                        }})
-                }else if (indexP > 0 && listP.length !== 0){
-                    indexP -= 1
-                    const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                    while (!await prodMessage(ctx) && indexP - 1 >= 0){
-                        indexP -= 1
-                    }
+            ctx.webhookReply = false
+            if (!listP) await loadProd(ctx)
+            let text = ctx.update.callback_query.message.caption.split('\n\n')
+            let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+            num--
+            if (num < listP.length){
+                if (num >= 0) {
+                    await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                    await prodMessage(ctx, num)
                 }
-            }
-        }catch(e){console.log(e)}
+            }else{
+                await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                await prodMessage(ctx, 0)
+        }}catch(e){console.log(e)}
     })
 
     bot.action('rightP', async ctx => {
         try{
-            if (await agreed(ctx)>=3)
-            { 
-                ctx.webhookReply = false
-                if (!listP){
-                    const promise = queryProduct.getAll(ctx)
+            ctx.webhookReply = false
+            if (!listP) await loadProd(ctx)
+            let text = ctx.update.callback_query.message.caption.split('\n\n')
+            let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+            num++
+            if (num < listP.length) {
+                await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                await prodMessage(ctx, num)
+            }
+        }catch(e){console.log(e)}}
+    )
 
-                    promise.then(async (data) =>{
-                        listP = data
-                        if (listP.length !== 0){
-                            indexP = parseInt((listP.length / 2), 10)
-                            const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                            while (!await prodMessage(ctx) && indexP + 1 < listP.length){
-                                indexP += 1
-                            }
-                        }})
-                }else if (indexP < listP.length - 1 && listP.length !== 0){
-                    indexP += 1
-                    const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                    while (!await prodMessage(ctx) && indexP + 1 < listP.length){
-                        indexP += 1
-                    }
-                } 
-            }       
-    }catch(e){console.log(e)}})
+    bot.action('заказатьP', async ctx => {           
+        try{
+            ctx.webhookReply = false
+            await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+            if (!listP) {
+                await ctx.reply('Пожалуйста, выберете продукт снова')
+                await loadProd(ctx)
+                await prodMessage(ctx, 0)
+            }else {
+                let text = ctx.update.callback_query.message.caption.split('\n\n')
+                let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listP[num].name, price: listP[num].price})}` ,
+                    Extra.HTML({                
+                    }).markup(Markup.inlineKeyboard([
+                        Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.back')}`, 'backP'),
+                        Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.ok')}`, 'okP')
+                    ])))
+            }
+        }catch(e){}
+    })
+
+    bot.action('backP', async ctx => { 
+        try {
+            ctx.webhookReply = false 
+            await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)        
+            if (!listP) await loadProd(ctx)
+            await prodMessage(ctx, 0)
+        }catch(e){console.log(e)}
+    }) 
+
+    bot.action('okP', async ctx => {
+        try{
+            ctx.webhookReply = false
+            await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+            const i = ctx.update.callback_query.message.text.indexOf('\n')
+            await ctx.telegram.sendMessage(CHAT_ID,
+                `<b>Заказ от пользователя </b><a href="tg://user?id=${ctx.update.callback_query.message.chat.id}">${ctx.update.callback_query.message.chat.first_name}</a>:${ctx.update.callback_query.message.text.substr(i)}`,
+                Extra.HTML())
+            await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ask.alright')}` ,
+            Extra.HTML({                
+            }).markup(Markup.inlineKeyboard([
+                Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.back')}`, 'backP'),
+            ])))
+        }catch(e){console.log(e)}
+    })
 
     // Услуги
 
     bot.hears(/👩🏻‍🔧/, async ctx =>  {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
         if (await agreed(ctx)>=3){
-            loadSer(ctx)
+            ctx.webhookReply = false
+            await loadSer(ctx)
+            if (listS.length !== 0){
+                await serMessage(ctx, 0)
+            }else {
+                ctx.reply("Извините, пока нет ни одной услуги")
+            } 
         }}
     );
 
     bot.action('leftS', async ctx => {
         try{
-            if (await agreed(ctx)>=3)
-            {    
-                ctx.webhookReply = false
-                if (!listS){
-                    const promise = queryService.getAll(ctx)
-                    promise.then(async (data) =>{
-                        listS = data
-                        if (listS.length !== 0){
-                            indexS = parseInt((listS.length / 2), 10)
-                            const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                            while (!await serMessage(ctx) && indexS - 1 >= 0){
-                                indexS -= 1
-                            }
-                        }})
-                }else if (indexS > 0 && listS.length !== 0){
-                    indexS -= 1
-                    const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                    while (! await serMessage(ctx) && indexS - 1 >= 0){
-                        indexS -= 1
-                    }
+            ctx.webhookReply = false
+            if (!listS) await loadSer(ctx)
+            let text = ctx.update.callback_query.message.caption.split('\n\n')
+            let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+            num--
+            if (num < listS.length){
+                if (num >= 0) {
+                    await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                    await serMessage(ctx, num)
                 }
+            }else{
+                await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                await serMessage(ctx, 0)
             }
-            }catch(e){console.log(e)}
+        }catch(e){console.log(e)}
     })
 
     bot.action('rightS', async ctx => {
         try{
-            if (await agreed(ctx)>=3)
-            {    
-                ctx.webhookReply = false
-                if (!listS){
-                    const promise = queryService.getAll(ctx)
+            ctx.webhookReply = false
+            if (!listS) await loadSer(ctx)     
+            let text = ctx.update.callback_query.message.caption.split('\n\n')
+            let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+            num++
+            if (num < listS.length) {
+                await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                await serMessage(ctx, num)
+            }
+        }catch(e){console.log(e)}
+    })
 
-                    promise.then(async (data) =>{
-                        listS = data
-                        if (listS.length !== 0){
-                            indexS = parseInt((listS.length / 2), 10)
-                            const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                            while (!await serMessage(ctx) && indexS + 1 < listS.length){
-                                indexS += 1
-                            }
-                        }})
-                }else if (indexS < listS.length - 1 && listS.length !== 0){
-                    indexS += 1
-                    const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                    while (! await serMessage(ctx) && indexS + 1 < listS.length){
-                        indexS += 1
-                    }
-                }
-        }}catch(e){console.log(e)}})
+    bot.action('заказатьS', async ctx => {           
+        try{
+            ctx.webhookReply = false
+            await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+            if (!listS) {
+                await ctx.reply('Пожалуйста, выберете услугу снова')
+                await loadSer(ctx)
+                await serMessage(ctx, 0)
+            }else {
+                let text = ctx.update.callback_query.message.caption.split('\n\n')
+                let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listS[num].name, price: listS[num].price})}` ,
+                    Extra.HTML({                
+                    }).markup(Markup.inlineKeyboard([
+                        Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.back')}`, 'backS'),
+                        Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.ok')}`, 'okS')
+                    ])))
+            }
+        }catch(e){}
+    })
+
+    bot.action('backS', async ctx => {  
+        try{ 
+            ctx.webhookReply = false
+            await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)        
+            if (!listS) await loadSer(ctx)
+            await serMessage(ctx, 0)
+        }catch(e){console.log(e)}
+    }) 
+
+    bot.action('okS', async ctx => {
+        try{
+            ctx.webhookReply = false
+            await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+            const i = ctx.update.callback_query.message.text.indexOf('\n')
+            await ctx.telegram.sendMessage(CHAT_ID,
+                `<b>Заказ от пользователя </b><a href="tg://user?id=${ctx.update.callback_query.message.chat.id}">${ctx.update.callback_query.message.chat.first_name}</a>:${ctx.update.callback_query.message.text.substr(i)}`,
+                Extra.HTML())
+            await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.ask.alright')}` ,
+            Extra.HTML({                
+            }).markup(Markup.inlineKeyboard([
+                Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.back')}`, 'backS'),
+            ])))
+        }catch(e){console.log(e)}
+    })
 
     // Вопросы
     
     bot.hears(/❓/, async ctx =>       //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
-        {
-            if (await agreed(ctx)>=3){
-                answers = await queryAnswer.getAll(ctx)
-                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.list')}`, Extra.HTML().markup(Markup.inlineKeyboard(convertKeyboard(answers, ctx))))
-            }
-        }  
+    {
+        if (await agreed(ctx)>=3){
+            answers = await queryAnswer.getAll(ctx)
+            await ctx.replyWithHTML(`${ctx.i18n.t('scenes.fond.list')}`, Extra.HTML().markup(Markup.inlineKeyboard(convertKeyboard(answers, ctx))))
+        }
+    }  
     );
 
     bot.action(/ques#/, async ctx => {
@@ -289,49 +354,7 @@ module.exports.setCommands = (bot) => {
                         await ctx.reply(`${ctx.i18n.t('admin')}`)
                 }
             }}catch(e){console.log(e)}
-      })
-
-    bot.action('заказатьP', async ctx => {           
-        try{
-            ctx.webhookReply = false
-            await ctx.telegram.deleteMessage(messageP.chat.id, messageP.message_id)
-            messageP = await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listP[indexP].name, price: listP[indexP].price})}` ,
-                Extra.HTML({                
-                }).markup(Markup.inlineKeyboard([
-                    Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.back')}`, 'backS'),
-                    Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.ok')}`, 'ok')
-                ])))
-        }catch(e){}
-    }) 
-
-    bot.action('backP', async ctx => {           
-        loadProd(ctx)
-    }) 
-
-    bot.action('ok', async ctx => {
-        const i = ctx.update.callback_query.message.text.indexOf('\n')
-        await ctx.telegram.sendMessage(CHAT_ID,
-            `<b>Заказ от пользователя </b><a href="tg://user?id=${ctx.update.callback_query.message.chat.id}">${ctx.update.callback_query.message.chat.first_name}</a>:${ctx.update.callback_query.message.text.substr(i)}`,
-            Extra.HTML())
-        loadProd(ctx)
-    })
-
-    bot.action('заказатьS', async ctx => {           
-        try{
-            ctx.webhookReply = false
-            await ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
-            messageS = await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listS[indexS].name, price: listS[indexS].price})}` ,
-                Extra.HTML({                
-                }).markup(Markup.inlineKeyboard([
-                    Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.back')}`, 'backS'),
-                    Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.ok')}`, 'ok')
-                ])))
-        }catch(e){}
-    }) 
-
-    bot.action('backS', async ctx => {           
-        loadSer(ctx)
-    }) 
+      }) 
 
     bot.hears(/🙋/, async ctx =>{
         if (await agreed(ctx)>=3){                
@@ -411,53 +434,48 @@ async function agreed(ctx){
 
 module.exports.menuMessage = menuMessage
 
-async function prodMessage(ctx){
+async function prodMessage(ctx, i){
     try{
+        i
         ctx.webhookReply = false
-        const mes = await ctx.replyWithPhoto(listP[indexP].imageSrc,
+        await ctx.replyWithPhoto(listP[i].imageSrc,
             Extra.load({
-                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[indexP].name, price: listP[indexP].price, description: listP[indexP].description})}\n(${indexP + 1}\\${listP.length})` ,
+                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[i].name, price: listP[i].price, description: listP[i].description})}\n(${i + 1}\\${listP.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.left')}`, 'leftP'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.right')}`, 'rightP')],
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.order')}`, 'заказатьP')]
             ])))
-        messageP = mes
-        //ctx.webhookReply = true
         return true
     }catch(e){
-        console.log(e)
-        //ctx.webhookReply = true
         return false       
     }
 }
 
-async function serMessage(ctx){
+async function serMessage(ctx, i){
     try{
         ctx.webhookReply = false
-        const mes = await ctx.replyWithPhoto(listS[indexS].imageSrc,
+        await ctx.replyWithPhoto(listS[i].imageSrc,
             Extra.load({
-                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[indexS].name, price: listS[indexS].price, description: listS[indexS].description})}\n(${indexS + 1}\\${listS.length})` ,
+                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[i].name, price: listS[i].price, description: listS[i].description})}\n(${i + 1}\\${listS.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.ser.right')}`, 'leftS'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.ser.right')}`, 'rightS')],
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.order')}`, 'заказатьS')]
-            ])))
-        messageS = mes
-        //ctx.webhookReply = true
-            return true
+            ])))    
+        return true
     }catch(e){
         console.log(e)
-        //ctx.webhookReply = true
         return false       
     }
 }
+
 const dict = {
     "ru" : 0,
     "en" : 1
 }
 
-function convertKeyboard(element){
+function convertKeyboard(element) {
     var keyboard = []
     element.forEach((item, i) => {
         keyboard.push([Markup.callbackButton(item.question, `ques#${i}`)])
@@ -465,43 +483,15 @@ function convertKeyboard(element){
     return keyboard
 }
 
-async function loadSer(ctx, userI){
+async function loadSer(ctx, i) {
     try{
-        if (messageS){
-            await ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
-        }
-        
-        const promise = queryService.getAll(ctx)
-
-        promise.then(async (data) =>{
-            listS = data
-            if (listS.length !== 0){
-                indexS = userI ? userI : parseInt((listS.length / 2), 10)
-                await serMessage(ctx)
-            }else {
-                ctx.reply("Извините, пока нет ни одной услуги")
-            }                           
-        }).catch( err => console.log(err))               
+        listS = await queryService.getAll(ctx)                                      
     }catch(e){console.log(e)}
 }
 
-async function loadProd(ctx, userI){
+async function loadProd(ctx, i){
     try{
-        if (messageP){
-            await ctx.telegram.deleteMessage(messageP.chat.id, messageP.message_id)
-        }
-
-        const promise = queryProduct.getAll(ctx)
-
-        promise.then(async (data) =>{
-            listP = data
-            if (listP.length !== 0){
-                indexP = userI ? userI : parseInt((listP.length / 2), 10)
-                await prodMessage(ctx)
-            }else {
-                await ctx.reply("Извините, пока нет ни одного товара")
-            }                            
-        }).catch( err => console.log(err))               
+        listP = await queryProduct.getAll(ctx)                               
     }catch(e){console.log(e)}
 }
 
