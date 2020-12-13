@@ -90,23 +90,26 @@ module.exports.setCommands = (bot) => {
     bot.action('leftP', async ctx => {
         try{
             if (await agreed(ctx)>=3)
-            if (!listP){
-                const promise = queryProduct.getAll(ctx)
+            { 
+                ctx.webhookReply = false
+                if (!listP){
+                    const promise = queryProduct.getAll(ctx)
 
-                promise.then(async (data) =>{
-                    listP = data
-                    if (listP.length !== 0){
-                        indexP = parseInt((listP.length / 2), 10)
-                        ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                        while (!await prodMessage(ctx) && indexP - 1 >= 0){
-                            indexP -= 1
-                        }
-                    }})
-            }else if (indexP > 0 && listP.length !== 0){
-                indexP -= 1
-                ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                while (!await prodMessage(ctx) && indexP - 1 >= 0){
+                    promise.then(async (data) =>{
+                        listP = data
+                        if (listP.length !== 0){
+                            indexP = parseInt((listP.length / 2), 10)
+                            const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                            while (!await prodMessage(ctx) && indexP - 1 >= 0){
+                                indexP -= 1
+                            }
+                        }})
+                }else if (indexP > 0 && listP.length !== 0){
                     indexP -= 1
+                    const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                    while (!await prodMessage(ctx) && indexP - 1 >= 0){
+                        indexP -= 1
+                    }
                 }
             }
         }catch(e){console.log(e)}
@@ -115,25 +118,28 @@ module.exports.setCommands = (bot) => {
     bot.action('rightP', async ctx => {
         try{
             if (await agreed(ctx)>=3)
-            if (!listP){
-                const promise = queryProduct.getAll(ctx)
+            { 
+                ctx.webhookReply = false
+                if (!listP){
+                    const promise = queryProduct.getAll(ctx)
 
-                promise.then(async (data) =>{
-                    listP = data
-                    if (listP.length !== 0){
-                        indexP = parseInt((listP.length / 2), 10)
-                        ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                        while (!await prodMessage(ctx) && indexP + 1 < listP.length){
-                            indexP += 1
-                        }
-                    }})
-            }else if (indexP < listP.length - 1 && listP.length !== 0){
-                indexP += 1
-                ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                while (!await prodMessage(ctx) && indexP + 1 < listP.length){
+                    promise.then(async (data) =>{
+                        listP = data
+                        if (listP.length !== 0){
+                            indexP = parseInt((listP.length / 2), 10)
+                            const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                            while (!await prodMessage(ctx) && indexP + 1 < listP.length){
+                                indexP += 1
+                            }
+                        }})
+                }else if (indexP < listP.length - 1 && listP.length !== 0){
                     indexP += 1
-                }
-            }        
+                    const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                    while (!await prodMessage(ctx) && indexP + 1 < listP.length){
+                        indexP += 1
+                    }
+                } 
+            }       
     }catch(e){console.log(e)}})
 
     // Услуги
@@ -147,51 +153,55 @@ module.exports.setCommands = (bot) => {
     bot.action('leftS', async ctx => {
         try{
             if (await agreed(ctx)>=3)
-            if (!listS){
-                const promise = queryService.getAll(ctx)
-
-                promise.then(async (data) =>{
-                    listS = data
-                    if (listS.length !== 0){
-                        indexS = parseInt((listS.length / 2), 10)
-                        ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                        while (! await serMessage(ctx) && indexS - 1 >= 0){
-                            indexS -= 1
-                        }
-                    }})
-            }else if (indexS > 0 && listS.length !== 0){
-                indexS -= 1
-                ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                while (! await serMessage(ctx) && indexS - 1 >= 0){
+            {    
+                ctx.webhookReply = false
+                if (!listS){
+                    const promise = queryService.getAll(ctx)
+                    promise.then(async (data) =>{
+                        listS = data
+                        if (listS.length !== 0){
+                            indexS = parseInt((listS.length / 2), 10)
+                            const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                            while (!await serMessage(ctx) && indexS - 1 >= 0){
+                                indexS -= 1
+                            }
+                        }})
+                }else if (indexS > 0 && listS.length !== 0){
                     indexS -= 1
+                    const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                    while (! await serMessage(ctx) && indexS - 1 >= 0){
+                        indexS -= 1
+                    }
                 }
             }
-        }catch(e){console.log(e)}
+            }catch(e){console.log(e)}
     })
 
     bot.action('rightS', async ctx => {
         try{
             if (await agreed(ctx)>=3)
-            if (!listS){
-                const promise = queryService.getAll(ctx)
+            {    
+                ctx.webhookReply = false
+                if (!listS){
+                    const promise = queryService.getAll(ctx)
 
-                promise.then(async (data) =>{
-                    listS = data
-                    if (listS.length !== 0){
-                        indexS = parseInt((listS.length / 2), 10)
-                        ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                        while (!await serMessage(ctx) && indexS + 1 < listS.length){
-                            indexS += 1
-                        }
-                    }})
-            }else if (indexS < listS.length - 1 && listS.length !== 0){
-                indexS += 1
-                ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
-                while (! await serMessage(ctx) && indexS + 1 < listS.length){
+                    promise.then(async (data) =>{
+                        listS = data
+                        if (listS.length !== 0){
+                            indexS = parseInt((listS.length / 2), 10)
+                            const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                            while (!await serMessage(ctx) && indexS + 1 < listS.length){
+                                indexS += 1
+                            }
+                        }})
+                }else if (indexS < listS.length - 1 && listS.length !== 0){
                     indexS += 1
+                    const a = await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
+                    while (! await serMessage(ctx) && indexS + 1 < listS.length){
+                        indexS += 1
+                    }
                 }
-            }
-        }catch(e){console.log(e)}})
+        }}catch(e){console.log(e)}})
 
     // Вопросы
     
@@ -308,8 +318,8 @@ module.exports.setCommands = (bot) => {
 
     bot.action('заказатьS', async ctx => {           
         try{
-            await ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
             ctx.webhookReply = false
+            await ctx.telegram.deleteMessage(messageS.chat.id, messageS.message_id)
             messageS = await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listS[indexS].name, price: listS[indexS].price})}` ,
                 Extra.HTML({                
                 }).markup(Markup.inlineKeyboard([
