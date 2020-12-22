@@ -126,15 +126,13 @@ scenes:
       We will provide you with contacts✨
     caption: |
       <b>${name}</b>
-      
-      Unit cost: ${price}
 
       ${description}
     buttons:
       ser:
         left: Previous
         right: Next
-      order: Order
+      order: Find out the cost
       prod:
         left: Previous
         right: Next
@@ -143,7 +141,6 @@ scenes:
         Please confirm your order:
 
         Name: ${name}
-        Cost: ${price}
       buttons:
         ok: Confirm
         back: Go back to the list

@@ -140,7 +140,7 @@ module.exports.setCommands = (bot) => {
             }else {
                 let text = ctx.update.callback_query.message.caption.split('\n\n')
                 let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
-                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listP[num].name, price: listP[num].price})}` ,
+                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listP[num].name})}` ,
                     Extra.HTML({                
                     }).markup(Markup.inlineKeyboard([
                         Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.back')}`, 'backP'),
@@ -233,7 +233,7 @@ module.exports.setCommands = (bot) => {
             }else {
                 let text = ctx.update.callback_query.message.caption.split('\n\n')
                 let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
-                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listS[num].name, price: listS[num].price})}` ,
+                await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listS[num].name})}` ,
                     Extra.HTML({                
                     }).markup(Markup.inlineKeyboard([
                         Markup.callbackButton(`${ctx.i18n.t('scenes.ser.order.buttons.back')}`, 'backS'),
@@ -440,7 +440,7 @@ async function prodMessage(ctx, i){
         ctx.webhookReply = false
         await ctx.replyWithPhoto(listP[i].imageSrc,
             Extra.load({
-                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[i].name, price: listP[i].price, description: listP[i].description})}\n(${i + 1}\\${listP.length})` ,
+                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[i].name, description: listP[i].description})}\n(${i + 1}\\${listP.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.left')}`, 'leftP'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.right')}`, 'rightP')],
@@ -457,7 +457,7 @@ async function serMessage(ctx, i){
         ctx.webhookReply = false
         await ctx.replyWithPhoto(listS[i].imageSrc,
             Extra.load({
-                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[i].name, price: listS[i].price, description: listS[i].description})}\n(${i + 1}\\${listS.length})` ,
+                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[i].name, description: listS[i].description})}\n(${i + 1}\\${listS.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.ser.right')}`, 'leftS'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.ser.right')}`, 'rightS')],

@@ -554,14 +554,10 @@ async function showPS(ctx, list){
 ${element.name[0]}
 🇷🇺 Описание:
 ${element.description[0]}
-🇷🇺 Стоимость:
-${element.price[0]}
 🇺🇸 Name:
 ${element.name[1]}
 🇺🇸 Description:
 ${element.description[1]}
-🇺🇸 Price:
-${element.price[1]}
 🇷🇺 Изображение:
 ${element.imageSrc}`)
     }}catch(e){}
@@ -605,7 +601,7 @@ async function deletePS(ctx, list){
 async function addPS(ctx, text){
     try{
     await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
-    const scem = {text: text + " Добавление элемента, скопируйте шаблон внизу и замените * на соотвствующий текст, максимальный размер названия - 100 символов, описания - 800, стоимости - 100", keyboard: [Markup.callbackButton('Отменить', 'back')]}
+    const scem = {text: text + " Добавление элемента, скопируйте шаблон внизу и замените * на соотвствующий текст, максимальный размер названия - 100 символов, описания - 900", keyboard: [Markup.callbackButton('Отменить', 'back')]}
     ctx.webhookReply = false
     message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
     //ctx.webhookReply = true
@@ -615,13 +611,9 @@ async function addPS(ctx, text){
 *
 🇷🇺 Описание:
 *
-🇷🇺 Стоимость:
-*
 🇺🇸 Name:
 *
 🇺🇸 Description:
-*
-🇺🇸 Price:
 *
 🇷🇺 Изображение:
 *`)}catch(e){}
@@ -640,7 +632,7 @@ async function redPS(ctx, text, list){
 
         if (elementPS) {
             await ctx.telegram.deleteMessage(message.chat.id, message.message_id)
-            const scem = {text: text + " Редактирование элемента, скопируйте шаблон внизу и замените то, что нужно, максимальный размер названия - 100 символов, описания - 800, стоимости - 100", keyboard: [Markup.callbackButton('Отменить', 'back')]}
+            const scem = {text: text + " Редактирование элемента, скопируйте шаблон внизу и замените то, что нужно, максимальный размер названия - 100 символов, описания - 900", keyboard: [Markup.callbackButton('Отменить', 'back')]}
             ctx.webhookReply = false
             message = await ctx.replyWithHTML(scem.text, Extra.HTML().markup(Markup.inlineKeyboard(scem.keyboard)))
             //ctx.webhookReply = true
@@ -650,14 +642,10 @@ async function redPS(ctx, text, list){
 ${elementPS.name[0]}
 🇷🇺 Описание:
 ${elementPS.description[0]}
-🇷🇺 Стоимость:
-${elementPS.price[0]}
 🇺🇸 Name:
 ${elementPS.name[1]}
 🇺🇸 Description:
 ${elementPS.description[1]}
-🇺🇸 Price:
-${elementPS.price[1]}
 🇷🇺 Изображение:
 ${elementPS.imageSrc}`)}}catch(e){}
 }
@@ -682,7 +670,6 @@ async function redPS1(ctx, list) {
                         if (item.id === element.id){
                             item.name = element.name
                             item.description = element.description
-                            item.price = element.price
                             item.imageSrc = element.imageSrc
                         }
                     })
@@ -741,7 +728,6 @@ function psParse(text, ctx){
         const element = {}
         element.name = []
         element.description = []
-        element.price = []
         
         let index = text.indexOf("🇷🇺 Название:")
         if (index === -1) throw Error()
@@ -751,14 +737,9 @@ function psParse(text, ctx){
         element.name[0] = text.substr(0, index - 1).trim().substr(0, 100)
 
         text = text.substr(index + 14)
-        index = text.indexOf("🇷🇺 Стоимость:")
-        if (index === -1) throw Error()
-        element.description[0] = text.substr(0, index - 1).trim().substr(0, 800)
-
-        text = text.substr(index + 15)
         index = text.indexOf("🇺🇸 Name:")
         if (index === -1) throw Error()
-        element.price[0] = text.substr(0, index - 1).trim().substr(0, 100)
+        element.description[0] = text.substr(0, index - 1).trim().substr(0, 900)
 
         text = text.substr(index + 10)
         index = text.indexOf("🇺🇸 Description:")
@@ -766,14 +747,9 @@ function psParse(text, ctx){
         element.name[1] = text.substr(0, index - 1).trim().substr(0, 100)
 
         text = text.substr(index + 17)
-        index = text.indexOf("🇺🇸 Price:")
-        if (index === -1) throw Error()
-        element.description[1] = text.substr(0, index - 1).trim().substr(0, 800)
-
-        text = text.substr(index + 11)
         index = text.indexOf("🇷🇺 Изображение:")
         if (index === -1) throw Error()
-        element.price[1] = text.substr(0, index - 1).trim().substr(0, 100)
+        element.description[1] = text.substr(0, index - 1).trim().substr(0, 900)
 
         text = text.substr(index + 17)
         element.imageSrc = text.trim()
