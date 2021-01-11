@@ -440,7 +440,7 @@ async function prodMessage(ctx, i){
         ctx.webhookReply = false
         await ctx.replyWithPhoto(listP[i].imageSrc,
             Extra.load({
-                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[i].name, description: listP[i].description})}\n(${i + 1}\\${listP.length})` ,
+                caption: `${listP[i].name} ${listP[i].description == "" ? "\n" + listP[i].description : ""}\n(${i + 1}\\${listP.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.left')}`, 'leftP'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.right')}`, 'rightP')],
