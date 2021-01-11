@@ -13,7 +13,8 @@ const serSchema = new Schema(
             required: true,
         }],
         description: [{
-            type: String
+            type: String,
+            default: ""
         }],
         price: [{
             type: String
