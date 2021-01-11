@@ -13,7 +13,7 @@ const {
 const TelegrafI18n = require('telegraf-i18n')
 const path = require("path")
 
-const start = require('./scenes/aStart')
+const start = require('./scenes/Start')
 const news = require('./scenes/News')
 const fond = require('./scenes/Fond')
 const admin = require('./scenes/Admin')
