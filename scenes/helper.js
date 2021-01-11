@@ -440,7 +440,7 @@ async function prodMessage(ctx, i){
         ctx.webhookReply = false
         await ctx.replyWithPhoto(listP[i].imageSrc,
             Extra.load({
-                caption: listP[i].name + listP[i].description == "" ? "\n" + listP[i].description : "" + "\n(" + (i + 1) + "\\" + listP.length + ")" ,
+                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[i].name, description: listS[i].description != "" ? "\n\n" + listS[i].description + "\n" : "\n"})}\n(${i + 1}\\${listP.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.left')}`, 'leftP'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.right')}`, 'rightP')],
@@ -448,7 +448,6 @@ async function prodMessage(ctx, i){
             ])))
         return true
     }catch(e){
-        console.log(e);
         return false       
     }
 }
@@ -458,7 +457,7 @@ async function serMessage(ctx, i){
         ctx.webhookReply = false
         await ctx.replyWithPhoto(listS[i].imageSrc,
             Extra.load({
-                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[i].name, description: listS[i].description})}\n(${i + 1}\\${listS.length})` ,
+                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[i].name, description: listS[i].description != "" ? "\n\n" + listS[i].description + "\n" : "\n"})}\n(${i + 1}\\${listS.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.ser.right')}`, 'leftS'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.ser.right')}`, 'rightS')],
