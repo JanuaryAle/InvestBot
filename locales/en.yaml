@@ -125,7 +125,9 @@ scenes:
       Find out more about the concrete service by clicking on it, and if you want, write us your impressions or place an order.
       We will provide you with contacts✨
     caption: |
-      <b>${name}</b>${description}
+      <b>${name}</b>
+
+      ${description}
     buttons:
       ser:
         left: Previous
