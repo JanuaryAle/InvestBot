@@ -448,6 +448,7 @@ async function prodMessage(ctx, i){
             ])))
         return true
     }catch(e){
+        console.log(e);
         return false       
     }
 }
