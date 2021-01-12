@@ -97,12 +97,24 @@ module.exports.setCommands = (bot) => {
         }}
     );
 
+    bot.action(/cont/, async ctx =>  {     //🎩|👩🏻‍🔧|🛍|❓|🌎|📈  
+        if (await agreed(ctx)>=3){
+            ctx.webhookReply = false
+            await loadSer(ctx)
+            if (listS.length !== 0){
+                await serMessage(ctx, 0)
+            }else {
+                ctx.reply("Извините, пока нет ни одной услуги")
+            } 
+        }}
+    );
+
     bot.action('leftP', async ctx => {
         try{
             ctx.webhookReply = false
             if (!listP) await loadProd(ctx)
-            let text = ctx.update.callback_query.message.caption.split('\n\n')
-            let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+            let text = ctx.update.callback_query.message.caption.split('(')
+            let num = +text[text.length - 1].trim().substr(0).split('\\')[0] - 1
             num--
             if (num < listP.length){
                 if (num >= 0) {
@@ -119,8 +131,8 @@ module.exports.setCommands = (bot) => {
         try{
             ctx.webhookReply = false
             if (!listP) await loadProd(ctx)
-            let text = ctx.update.callback_query.message.caption.split('\n\n')
-            let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+            let text = ctx.update.callback_query.message.caption.split('(')
+            let num = +text[text.length - 1].trim().substr(0).split('\\')[0] - 1
             num++
             if (num < listP.length) {
                 await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
@@ -138,8 +150,8 @@ module.exports.setCommands = (bot) => {
                 await loadProd(ctx)
                 await prodMessage(ctx, 0)
             }else {
-                let text = ctx.update.callback_query.message.caption.split('\n\n')
-                let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+                let text = ctx.update.callback_query.message.caption.split('(')
+                let num = +text[text.length - 1].trim().substr(0).split('\\')[0] - 1
                 await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listP[num].name})}` ,
                     Extra.HTML({                
                     }).markup(Markup.inlineKeyboard([
@@ -193,8 +205,8 @@ module.exports.setCommands = (bot) => {
         try{
             ctx.webhookReply = false
             if (!listS) await loadSer(ctx)
-            let text = ctx.update.callback_query.message.caption.split('\n\n')
-            let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+            let text = ctx.update.callback_query.message.caption.split('(')
+            let num = +text[text.length - 1].trim().substr(0).split('\\')[0] - 1
             num--
             if (num < listS.length){
                 if (num >= 0) {
@@ -212,8 +224,8 @@ module.exports.setCommands = (bot) => {
         try{
             ctx.webhookReply = false
             if (!listS) await loadSer(ctx)     
-            let text = ctx.update.callback_query.message.caption.split('\n\n')
-            let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+            let text = ctx.update.callback_query.message.caption.split('(')
+            let num = +text[text.length - 1].trim().substr(0).split('\\')[0] - 1
             num++
             if (num < listS.length) {
                 await ctx.telegram.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id)
@@ -231,8 +243,8 @@ module.exports.setCommands = (bot) => {
                 await loadSer(ctx)
                 await serMessage(ctx, 0)
             }else {
-                let text = ctx.update.callback_query.message.caption.split('\n\n')
-                let num = +text[text.length - 1].trim().substr(1, text.length - 2).split('\\')[0] - 1
+                let text = ctx.update.callback_query.message.caption.split('(')
+                let num = +text[text.length - 1].trim().substr(0).split('\\')[0] - 1
                 await ctx.replyWithHTML(`${ctx.i18n.t('scenes.ser.order.text', {name: listS[num].name})}` ,
                     Extra.HTML({                
                     }).markup(Markup.inlineKeyboard([
@@ -440,7 +452,7 @@ async function prodMessage(ctx, i){
         ctx.webhookReply = false
         await ctx.replyWithPhoto(listP[i].imageSrc,
             Extra.load({
-                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[i].name, description: listP[i].description})}\n(${i + 1}\\${listP.length})` ,
+                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listP[i].name, description: listP[i].description != "" ? "\n\n" + listP[i].description + "\n\n" : "\n\n" })}(${i + 1}\\${listP.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.left')}`, 'leftP'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.prod.right')}`, 'rightP')],
@@ -448,7 +460,6 @@ async function prodMessage(ctx, i){
             ])))
         return true
     }catch(e){
-        console.log(e)
         return false       
     }
 }
@@ -458,7 +469,7 @@ async function serMessage(ctx, i){
         ctx.webhookReply = false
         await ctx.replyWithPhoto(listS[i].imageSrc,
             Extra.load({
-                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[i].name, description: listS[i].description})}\n(${i + 1}\\${listS.length})` ,
+                caption: `${ctx.i18n.t('scenes.ser.caption', {name: listS[i].name, description: listS[i].description != "" ? "\n\n" + listS[i].description + "\n\n" : "\n\n"})}(${i + 1}\\${listS.length})` ,
                 parse_mode: 'HTML'
             }).markup(Markup.inlineKeyboard([
                 [Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.ser.right')}`, 'leftS'), Markup.callbackButton(`${ctx.i18n.t('scenes.ser.buttons.ser.right')}`, 'rightS')],
