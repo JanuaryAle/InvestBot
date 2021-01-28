@@ -12,15 +12,10 @@ const CHAT_ID = process.env.CALLBACK_CHAT
 let docs
 let user
 
-let messageP
 let listP
-let indexP
 let answers
-let send
 
-let messageS
 let listS
-let indexS
 
 module.exports.setCommands = (bot) => {
 
